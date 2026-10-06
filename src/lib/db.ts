@@ -131,7 +131,28 @@ async function readRaw(): Promise<DB> {
     const kv = getKvConfig();
     if (kv) {
       const remote = await readKv(kv.url, kv.token);
-      if (remote && remote.teams && remote.teams.length > 0) return remote;
+      if (remote && remote.teams && remote.teams.length > 0) {
+        // Si la base de datos remota aún tiene los nombres por defecto "Equipo 1",
+        // sincronizar automáticamente con los nombres oficiales y plantillas de initialData
+        const hasGenericNames = remote.teams.some((t) => /^Equipo \d+$/.test(t.name));
+        if (hasGenericNames) {
+          const official = initialData as DB;
+          // Actualizar nombres y colores
+          for (let i = 0; i < remote.teams.length; i++) {
+            if (official.teams[i]) {
+              remote.teams[i].name = official.teams[i].name;
+              remote.teams[i].shortName = official.teams[i].shortName;
+              remote.teams[i].color = official.teams[i].color;
+            }
+          }
+          // Si no tenía jugadores, cargar los 140 jugadores oficiales vinculándolos a los ids de equipos
+          if (!remote.players || remote.players.length === 0) {
+            remote.players = official.players;
+          }
+          await writeKv(kv.url, kv.token, remote);
+        }
+        return remote;
+      }
       // Primera vez con KV: volcar datos iniciales
       const local = (await readLocalFile()) || (initialData as DB);
       await writeKv(kv.url, kv.token, local);
