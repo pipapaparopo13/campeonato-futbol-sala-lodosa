@@ -339,7 +339,8 @@ export async function quickLiveUpdate(fd: FormData) {
   const matchId = str(fd, "matchId");
   const actionType = str(fd, "actionType"); // "start_live" | "score_delta" | "set_status"
   const side = str(fd, "side") as "home" | "away";
-  const delta = intOrNull(fd, "delta") ?? 1;
+  const rawDelta = Number.parseInt(str(fd, "delta"), 10);
+  const delta = Number.isFinite(rawDelta) ? rawDelta : 1;
   const newStatus = str(fd, "newStatus") as MatchStatus;
   const back = str(fd, "redirectTo") || `/admin/partidos/${matchId}`;
 
