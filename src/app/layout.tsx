@@ -53,32 +53,34 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col bg-slate-50 text-slate-800">
-        <header className="bg-gradient-to-br from-emerald-800 via-emerald-700 to-teal-700 text-white shadow-md">
-          <div className="mx-auto max-w-6xl px-4 pt-5 pb-3">
-            <div className="mb-3 flex items-center justify-between gap-4">
-              <Link href="/" className="flex items-center gap-3">
-                <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/15 text-2xl">
+        <header className="sticky top-0 z-30 bg-gradient-to-br from-emerald-800 via-emerald-700 to-teal-700 text-white shadow-md">
+          <div className="mx-auto max-w-6xl px-4 py-3 sm:py-4">
+            <div className="flex items-center justify-between gap-3">
+              <Link href="/" className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+                <span className="flex h-10 w-10 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-xl bg-white/15 text-xl sm:text-2xl shadow-inner">
                   ⚽
                 </span>
-                <span>
-                  <span className="block text-lg leading-tight font-extrabold sm:text-xl">
+                <span className="min-w-0 truncate">
+                  <span className="block text-base leading-tight font-extrabold sm:text-lg md:text-xl truncate">
                     {settings.name}
                   </span>
-                  <span className="block text-xs text-emerald-100/80">
-                    {settings.location} · Temporada {settings.season}
+                  <span className="block text-[11px] sm:text-xs text-emerald-100/80 truncate">
+                    {settings.location} · {settings.season}
                   </span>
                 </span>
               </Link>
-              {admin && (
-                <Link
-                  href="/admin"
-                  className="rounded-lg bg-amber-400 px-3 py-2 text-xs font-bold text-amber-950 shadow hover:bg-amber-300"
-                >
-                  Panel del editor
-                </Link>
-              )}
+              <div className="flex items-center gap-2 shrink-0">
+                {admin && (
+                  <Link
+                    href="/admin"
+                    className="hidden md:inline-flex rounded-lg bg-amber-400 px-3 py-1.5 text-xs font-bold text-amber-950 shadow hover:bg-amber-300"
+                  >
+                    Panel del editor
+                  </Link>
+                )}
+                <MainNav admin={admin} />
+              </div>
             </div>
-            <MainNav />
           </div>
         </header>
         <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8">

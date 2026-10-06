@@ -66,15 +66,15 @@ export function Card({
 }) {
   return (
     <section
-      className={`rounded-2xl border border-slate-200 bg-white shadow-sm ${className}`}
+      className={`rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden ${className}`}
     >
       {title && (
-        <div className="flex items-center justify-between border-b border-slate-100 px-5 py-3">
-          <h2 className="font-bold text-slate-800">{title}</h2>
+        <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3 sm:px-5">
+          <h2 className="font-bold text-slate-900 text-sm sm:text-base">{title}</h2>
           {action}
         </div>
       )}
-      <div className="p-5">{children}</div>
+      <div className="p-3.5 sm:p-5">{children}</div>
     </section>
   );
 }
@@ -116,35 +116,35 @@ export function MatchRow({
   return (
     <Link
       href={href ?? `/partidos/${match.id}`}
-      className="group grid grid-cols-[1fr_auto_1fr] items-center gap-3 rounded-xl px-3 py-3 transition hover:bg-emerald-50"
+      className="group grid grid-cols-[1fr_auto_1fr] items-center gap-2 sm:gap-3 rounded-xl px-2 sm:px-3 py-2.5 sm:py-3 transition hover:bg-emerald-50 active:bg-emerald-100/50"
     >
-      <div className="flex min-w-0 items-center justify-end gap-2 text-right">
-        <span className="truncate font-semibold text-slate-800">
+      <div className="flex min-w-0 items-center justify-end gap-1.5 sm:gap-2 text-right">
+        <span className="truncate text-xs sm:text-sm font-semibold text-slate-800">
           {home?.name ?? "?"}
         </span>
         <TeamBadge team={home} size="sm" />
       </div>
-      <div className="flex min-w-[88px] flex-col items-center">
+      <div className="flex min-w-[70px] sm:min-w-[88px] flex-col items-center">
         {played ? (
-          <span className="rounded-lg bg-slate-900 px-3 py-1 font-mono text-lg font-bold text-white">
+          <span className="rounded-lg bg-slate-900 px-2 sm:px-3 py-0.5 sm:py-1 font-mono text-base sm:text-lg font-bold text-white shadow-xs">
             {match.homeScore} - {match.awayScore}
           </span>
         ) : (
           <span
-            className={`rounded-lg px-3 py-1 text-xs font-semibold ${match.status === "postponed" ? "bg-amber-100 text-amber-800" : "bg-slate-100 text-slate-600"}`}
+            className={`rounded-lg px-2 sm:px-3 py-0.5 sm:py-1 text-[11px] sm:text-xs font-semibold ${match.status === "postponed" ? "bg-amber-100 text-amber-800" : "bg-slate-100 text-slate-600"}`}
           >
             {match.status === "postponed"
               ? STATUS_LABELS.postponed
               : match.time || "vs"}
           </span>
         )}
-        <span className="mt-1 text-[11px] text-slate-400">
+        <span className="mt-0.5 sm:mt-1 text-[10px] sm:text-[11px] text-slate-400">
           {formatDate(match.date)}
         </span>
       </div>
-      <div className="flex min-w-0 items-center gap-2">
+      <div className="flex min-w-0 items-center gap-1.5 sm:gap-2">
         <TeamBadge team={away} size="sm" />
-        <span className="truncate font-semibold text-slate-800">
+        <span className="truncate text-xs sm:text-sm font-semibold text-slate-800">
           {away?.name ?? "?"}
         </span>
       </div>
@@ -167,60 +167,60 @@ export function StandingsTable({
   compact?: boolean;
 }) {
   return (
-    <div className="-mx-5 overflow-x-auto">
-      <table className="w-full min-w-[420px] text-sm">
+    <div className="-mx-3.5 sm:-mx-5 overflow-x-auto">
+      <table className="w-full min-w-[340px] text-xs sm:text-sm">
         <thead>
-          <tr className="text-xs uppercase tracking-wide text-slate-400">
-            <th className="w-8 py-2 pl-5 text-left">#</th>
+          <tr className="text-[11px] sm:text-xs uppercase tracking-wide text-slate-400 border-b border-slate-100">
+            <th className="w-6 sm:w-8 py-2 pl-3 sm:pl-5 text-left">#</th>
             <th className="py-2 text-left">Equipo</th>
-            <th className="py-2 text-center" title="Partidos jugados">PJ</th>
+            <th className="py-2 px-1 text-center" title="Partidos jugados">PJ</th>
             {!compact && (
               <>
-                <th className="py-2 text-center" title="Ganados">G</th>
-                <th className="py-2 text-center" title="Empatados">E</th>
-                <th className="py-2 text-center" title="Perdidos">P</th>
-                <th className="py-2 text-center" title="Goles a favor">GF</th>
-                <th className="py-2 text-center" title="Goles en contra">GC</th>
+                <th className="py-2 px-1 text-center" title="Ganados">G</th>
+                <th className="py-2 px-1 text-center" title="Empatados">E</th>
+                <th className="py-2 px-1 text-center" title="Perdidos">P</th>
+                <th className="hidden py-2 px-1 text-center sm:table-cell" title="Goles a favor">GF</th>
+                <th className="hidden py-2 px-1 text-center sm:table-cell" title="Goles en contra">GC</th>
               </>
             )}
-            <th className="py-2 text-center" title="Diferencia de goles">DG</th>
-            <th className="py-2 pr-5 text-center">Pts</th>
-            {!compact && <th className="hidden py-2 pr-5 text-left sm:table-cell">Últimos</th>}
+            <th className="py-2 px-1 text-center" title="Diferencia de goles">DG</th>
+            <th className="py-2 pr-3 sm:pr-5 text-center">Pts</th>
+            {!compact && <th className="hidden py-2 pr-5 text-left md:table-cell">Últimos</th>}
           </tr>
         </thead>
         <tbody>
           {rows.map((r, i) => {
             const dg = r.goalsFor - r.goalsAgainst;
             return (
-              <tr key={r.team.id} className="border-t border-slate-100">
-                <td className="py-2.5 pl-5 font-bold text-slate-400">{i + 1}</td>
-                <td className="py-2.5">
+              <tr key={r.team.id} className="border-t border-slate-100 hover:bg-slate-50/70">
+                <td className="py-2 sm:py-2.5 pl-3 sm:pl-5 font-bold text-slate-400">{i + 1}</td>
+                <td className="py-2 sm:py-2.5">
                   <Link
                     href={`/equipos/${r.team.id}`}
-                    className="flex items-center gap-2 font-semibold text-slate-800 hover:underline"
+                    className="flex items-center gap-1.5 sm:gap-2 font-semibold text-slate-800 hover:underline"
                   >
                     <TeamBadge team={r.team} size="sm" />
-                    <span className="truncate">{r.team.name}</span>
+                    <span className="truncate max-w-[130px] sm:max-w-none">{r.team.name}</span>
                   </Link>
                 </td>
-                <td className="py-2.5 text-center">{r.played}</td>
+                <td className="py-2 sm:py-2.5 px-1 text-center">{r.played}</td>
                 {!compact && (
                   <>
-                    <td className="py-2.5 text-center">{r.won}</td>
-                    <td className="py-2.5 text-center">{r.drawn}</td>
-                    <td className="py-2.5 text-center">{r.lost}</td>
-                    <td className="py-2.5 text-center">{r.goalsFor}</td>
-                    <td className="py-2.5 text-center">{r.goalsAgainst}</td>
+                    <td className="py-2 sm:py-2.5 px-1 text-center">{r.won}</td>
+                    <td className="py-2 sm:py-2.5 px-1 text-center">{r.drawn}</td>
+                    <td className="py-2 sm:py-2.5 px-1 text-center">{r.lost}</td>
+                    <td className="hidden py-2 sm:py-2.5 px-1 text-center sm:table-cell">{r.goalsFor}</td>
+                    <td className="hidden py-2 sm:py-2.5 px-1 text-center sm:table-cell">{r.goalsAgainst}</td>
                   </>
                 )}
-                <td className="py-2.5 text-center text-slate-500">
+                <td className="py-2 sm:py-2.5 px-1 text-center text-slate-500 font-mono text-[11px] sm:text-xs">
                   {dg > 0 ? `+${dg}` : dg}
                 </td>
-                <td className="py-2.5 pr-5 text-center text-base font-extrabold text-emerald-700">
+                <td className="py-2 sm:py-2.5 pr-3 sm:pr-5 text-center text-sm sm:text-base font-extrabold text-emerald-700">
                   {r.points}
                 </td>
                 {!compact && (
-                  <td className="hidden py-2.5 pr-5 sm:table-cell">
+                  <td className="hidden py-2.5 pr-5 md:table-cell">
                     <div className="flex gap-1">
                       {r.form.map((f, j) => (
                         <span

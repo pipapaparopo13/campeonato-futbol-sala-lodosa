@@ -70,31 +70,31 @@ export default async function ActaPage({ params }: Props) {
             {STATUS_LABELS[match.status]}
           </span>
         </div>
-        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4 px-4 py-8">
-          <div className="flex flex-col items-center gap-2 text-center">
+        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 sm:gap-4 px-3 sm:px-4 py-5 sm:py-8">
+          <div className="flex flex-col items-center gap-1.5 sm:gap-2 text-center min-w-0">
             <TeamBadge team={home} size="lg" />
-            <span className="font-bold sm:text-lg">
+            <span className="font-bold text-xs sm:text-base md:text-lg truncate max-w-full">
               <TeamName team={home} />
             </span>
-            <span className="text-xs text-slate-400">Local</span>
+            <span className="text-[10px] sm:text-xs text-slate-400">Local</span>
           </div>
-          <div className="text-center font-mono text-4xl font-black sm:text-6xl">
+          <div className="text-center font-mono text-3xl font-black sm:text-5xl md:text-6xl px-1 sm:px-2">
             {played ? (
               <>
                 {match.homeScore}
-                <span className="mx-2 text-slate-500">-</span>
+                <span className="mx-1.5 sm:mx-2 text-slate-500">-</span>
                 {match.awayScore}
               </>
             ) : (
-              <span className="text-2xl text-slate-400 sm:text-3xl">{match.time || "vs"}</span>
+              <span className="text-xl text-slate-400 sm:text-3xl">{match.time || "vs"}</span>
             )}
           </div>
-          <div className="flex flex-col items-center gap-2 text-center">
+          <div className="flex flex-col items-center gap-1.5 sm:gap-2 text-center min-w-0">
             <TeamBadge team={away} size="lg" />
-            <span className="font-bold sm:text-lg">
+            <span className="font-bold text-xs sm:text-base md:text-lg truncate max-w-full">
               <TeamName team={away} />
             </span>
-            <span className="text-xs text-slate-400">Visitante</span>
+            <span className="text-[10px] sm:text-xs text-slate-400">Visitante</span>
           </div>
         </div>
         <dl className="grid grid-cols-2 gap-px bg-white/10 text-sm sm:grid-cols-4">
