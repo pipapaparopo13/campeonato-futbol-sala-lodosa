@@ -3,12 +3,14 @@ import { getDB } from "@/lib/db";
 import { formatDate, sortMatches, teamMap } from "@/lib/stats";
 import { Card, Empty, MatchRow, PageTitle } from "@/components/ui";
 import { CUP_ROUNDS, TOURNAMENT_BREAKS } from "@/lib/calendar-plan";
+import { RoundPosterModal } from "@/components/round-poster-modal";
 
 export const metadata: Metadata = { title: "Calendario y resultados" };
 
 export default async function CalendarioPage() {
   const db = await getDB();
   const teams = teamMap(db);
+  const teamsObj = Object.fromEntries(teams);
 
   const ligaMatches = sortMatches(
     db.matches.filter((m) => (m.competition ?? "liga") === "liga"),
@@ -32,9 +34,14 @@ export default async function CalendarioPage() {
   return (
     <div className="space-y-8">
       <div>
-        <PageTitle subtitle="Todos los partidos se disputan los sábados en el Polideportivo Municipal de Lodosa.">
-          Calendario oficial 2026 / 2027
-        </PageTitle>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <PageTitle subtitle="Todos los partidos se disputan los sábados en el Polideportivo Municipal de Lodosa.">
+            Calendario oficial 2026 / 2027
+          </PageTitle>
+          <div className="shrink-0 mb-3 sm:mb-0">
+            <RoundPosterModal matches={db.matches} teams={teamsObj} />
+          </div>
+        </div>
 
         {/* Resumen de descansos y copas */}
         <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
