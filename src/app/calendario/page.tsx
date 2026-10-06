@@ -4,6 +4,7 @@ import { formatDate, sortMatches, teamMap } from "@/lib/stats";
 import { Card, Empty, MatchRow, PageTitle } from "@/components/ui";
 import { CUP_ROUNDS, TOURNAMENT_BREAKS } from "@/lib/calendar-plan";
 import { RoundPosterModal } from "@/components/round-poster-modal";
+import { CalendarPdfButton } from "@/components/calendar-pdf-button";
 
 export const metadata: Metadata = { title: "Calendario y resultados" };
 
@@ -38,7 +39,12 @@ export default async function CalendarioPage() {
           <PageTitle subtitle="Todos los partidos se disputan los sábados en el Polideportivo Municipal de Lodosa.">
             Calendario oficial 2026 / 2027
           </PageTitle>
-          <div className="shrink-0 mb-3 sm:mb-0">
+          <div className="flex flex-wrap items-center gap-2 shrink-0 mb-3 sm:mb-0">
+            <CalendarPdfButton
+              matches={db.matches}
+              teams={teamsObj}
+              settings={db.settings}
+            />
             <RoundPosterModal matches={db.matches} teams={teamsObj} />
           </div>
         </div>
