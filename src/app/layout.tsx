@@ -60,7 +60,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
                 <img
                   src="/logo.png"
                   alt="Escudo FS Lodosa"
-                  className="h-10 w-10 sm:h-11 sm:w-11 shrink-0 rounded-lg object-contain bg-white/10 p-0.5 shadow-sm"
+                  className="h-10 w-10 sm:h-11 sm:w-11 shrink-0 object-contain drop-shadow-md"
                 />
                 <span className="min-w-0 truncate">
                   <span className="block text-base leading-tight font-extrabold sm:text-lg md:text-xl truncate">

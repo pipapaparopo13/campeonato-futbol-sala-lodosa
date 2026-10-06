@@ -70,7 +70,7 @@ export function InstallAppBanner() {
           <img
             src="/icon-192.png"
             alt="Logo FS Lodosa"
-            className="h-12 w-12 shrink-0 rounded-xl object-contain bg-white/10 p-1 shadow-md"
+            className="h-12 w-12 shrink-0 object-contain drop-shadow-md"
           />
 
           <div className="flex-1">
