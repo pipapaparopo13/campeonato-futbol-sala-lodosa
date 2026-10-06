@@ -67,9 +67,11 @@ export function InstallAppBanner() {
     <div className="fixed bottom-4 left-4 right-4 z-50 mx-auto max-w-md animate-in fade-in slide-in-from-bottom-5 duration-300">
       <div className="rounded-2xl border border-emerald-400/40 bg-slate-900/95 p-4 text-white shadow-2xl backdrop-blur-md">
         <div className="flex items-start gap-3">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-600 to-teal-700 text-2xl shadow-inner">
-            ⚽
-          </div>
+          <img
+            src="/icon-192.png"
+            alt="Logo FS Lodosa"
+            className="h-12 w-12 shrink-0 rounded-xl object-contain bg-white/10 p-1 shadow-md"
+          />
 
           <div className="flex-1">
             <div className="flex items-center justify-between">

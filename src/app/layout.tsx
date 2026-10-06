@@ -57,9 +57,11 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           <div className="mx-auto max-w-6xl px-4 py-3 sm:py-4">
             <div className="flex items-center justify-between gap-3">
               <Link href="/" className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-                <span className="flex h-10 w-10 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-xl bg-white/15 text-xl sm:text-2xl shadow-inner">
-                  ⚽
-                </span>
+                <img
+                  src="/logo.png"
+                  alt="Escudo FS Lodosa"
+                  className="h-10 w-10 sm:h-11 sm:w-11 shrink-0 rounded-lg object-contain bg-white/10 p-0.5 shadow-sm"
+                />
                 <span className="min-w-0 truncate">
                   <span className="block text-base leading-tight font-extrabold sm:text-lg md:text-xl truncate">
                     {settings.name}
