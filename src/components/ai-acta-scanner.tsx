@@ -2,22 +2,38 @@
 
 import { useState } from "react";
 import { scanActaPhoto } from "@/app/actions";
+import { compressImage } from "@/lib/image-compress";
 
 export function AiActaScanner({ matchId }: { matchId: string }) {
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) {
       setPreview(null);
+      setSelectedFile(null);
       return;
     }
-    const reader = new FileReader();
-    reader.onload = () => {
-      setPreview(reader.result as string);
-    };
-    reader.readAsDataURL(file);
+    setErrorMsg(null);
+    try {
+      const compressed = await compressImage(file, 2048, 2048, 0.82);
+      setSelectedFile(compressed);
+      const reader = new FileReader();
+      reader.onload = () => {
+        setPreview(reader.result as string);
+      };
+      reader.readAsDataURL(compressed);
+    } catch {
+      setSelectedFile(file);
+      const reader = new FileReader();
+      reader.onload = () => {
+        setPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
   }
 
   return (
@@ -36,11 +52,31 @@ export function AiActaScanner({ matchId }: { matchId: string }) {
         </div>
       </div>
 
+      {errorMsg && (
+        <div className="mt-3 rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs font-semibold text-rose-800">
+          ⚠️ {errorMsg}
+        </div>
+      )}
+
       <form
         action={async (formData) => {
           setLoading(true);
+          setErrorMsg(null);
           try {
+            if (selectedFile) {
+              formData.set("photo", selectedFile);
+            }
             await scanActaPhoto(formData);
+          } catch (err: any) {
+            const msg = err?.message || String(err);
+            if (msg.includes("NEXT_REDIRECT")) {
+              throw err;
+            }
+            if (msg.includes("441") || msg.includes("Server Components")) {
+              setErrorMsg("La fotografía es demasiado pesada para el servidor. Intenta recortarla o hacerla más cerca.");
+            } else {
+              setErrorMsg(msg || "Error al procesar la foto con IA.");
+            }
           } finally {
             setLoading(false);
           }

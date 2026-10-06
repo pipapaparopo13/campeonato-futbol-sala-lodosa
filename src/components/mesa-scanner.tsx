@@ -5,6 +5,7 @@ import type { EventType, Match, Player, Team } from "@/lib/types";
 import { extractActaData, saveActaReviewed } from "@/app/actions";
 import { formatDate } from "@/lib/stats";
 import type { ExtractedActaEvent } from "@/lib/ai-acta";
+import { compressImage } from "@/lib/image-compress";
 
 interface Props {
   matches: Match[];
@@ -123,20 +124,31 @@ export function MesaScanner({ matches, teams, players }: Props) {
     }
   }
 
-  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) {
       setPreview(null);
       setSelectedFile(null);
       return;
     }
-    setSelectedFile(file);
     setExtractError(null);
-    const reader = new FileReader();
-    reader.onload = () => {
-      setPreview(reader.result as string);
-    };
-    reader.readAsDataURL(file);
+    try {
+      // Comprimir en el cliente para móviles (evita error 441 por tamaño excesivo)
+      const compressed = await compressImage(file, 2048, 2048, 0.82);
+      setSelectedFile(compressed);
+      const reader = new FileReader();
+      reader.onload = () => {
+        setPreview(reader.result as string);
+      };
+      reader.readAsDataURL(compressed);
+    } catch {
+      setSelectedFile(file);
+      const reader = new FileReader();
+      reader.onload = () => {
+        setPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
   }
 
   // Ejecutar extracción con IA
@@ -147,9 +159,15 @@ export function MesaScanner({ matches, teams, players }: Props) {
     setExtractError(null);
 
     try {
+      // Re-comprimir por seguridad si supera 1MB
+      let fileToSend = selectedFile;
+      if (fileToSend.size > 1024 * 1024) {
+        fileToSend = await compressImage(fileToSend, 1920, 1920, 0.75);
+      }
+
       const fd = new FormData();
       fd.append("matchId", selectedMatch.id);
-      fd.append("photo", selectedFile);
+      fd.append("photo", fileToSend);
 
       const res = await extractActaData(fd);
 
@@ -177,7 +195,15 @@ export function MesaScanner({ matches, teams, players }: Props) {
       setEditEvents(converted);
       setHasExtractedData(true);
     } catch (err: any) {
-      setExtractError(err?.message || "Error al procesar la fotografía.");
+      console.error("Error al procesar acta:", err);
+      const msg = err?.message || String(err);
+      if (msg.includes("441") || msg.includes("Server Components")) {
+        setExtractError(
+          "La fotografía es demasiado pesada para el servidor. Intenta hacer la foto un poco más de cerca o recortar los bordes.",
+        );
+      } else {
+        setExtractError(msg || "Error al procesar la fotografía.");
+      }
     } finally {
       setIsExtracting(false);
     }
