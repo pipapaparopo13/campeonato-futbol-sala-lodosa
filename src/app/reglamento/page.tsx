@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
-import { PageTitle, Card } from "@/components/ui";
+import { getDB } from "@/lib/db";
+import { PageTitle } from "@/components/ui";
+import { ReglamentoPdfButton } from "@/components/reglamento-pdf-button";
 
 export const metadata: Metadata = {
   title: "Reglamento oficial y Código de Sanciones",
@@ -49,13 +51,20 @@ const ARTICLES = [
   "Toda la información actualizada de partidos, actas oficiales, sanciones y clasificaciones se publicará en esta plataforma web oficial del campeonato.",
 ];
 
-export default function ReglamentoPage() {
+export default async function ReglamentoPage() {
+  const { settings } = await getDB();
+
   return (
     <div className="space-y-8">
       <div>
-        <PageTitle subtitle="Normativa oficial aprobada para el Campeonato de Fútbol Sala de Lodosa · Temporada 2026/2027">
-          Reglamento Oficial y Código de Sanciones
-        </PageTitle>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <PageTitle subtitle="Normativa oficial aprobada para el Campeonato de Fútbol Sala de Lodosa · Temporada 2026/2027">
+            Reglamento Oficial y Código de Sanciones
+          </PageTitle>
+          <div className="shrink-0 mb-3 sm:mb-0">
+            <ReglamentoPdfButton articles={ARTICLES} settings={settings} />
+          </div>
+        </div>
 
         {/* Resumen rápido de reglas clave */}
         <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
