@@ -8,8 +8,8 @@ import { EVENT_LABELS, STATUS_LABELS } from "@/lib/types";
 import { Card, Empty, EventIcon, Flash, PageTitle, TeamBadge } from "@/components/ui";
 import { ConfirmButton } from "@/components/confirm-button";
 import { AiActaScanner } from "@/components/ai-acta-scanner";
-
-import { requireAdmin } from "@/lib/auth";
+import { LiveControlPanel } from "@/components/live-control-panel";
+import { requireEditorOrReferee } from "@/lib/auth";
 
 export const metadata: Metadata = { title: "Editar acta" };
 
@@ -20,7 +20,7 @@ export default async function AdminPartido({
   params: Promise<{ id: string }>;
   searchParams: Promise<{ error?: string; ok?: string }>;
 }) {
-  await requireAdmin();
+  await requireEditorOrReferee();
   const [{ id }, sp, db] = await Promise.all([params, searchParams, getDB()]);
   const match = db.matches.find((m) => m.id === id);
   if (!match) notFound();
@@ -61,7 +61,8 @@ export default async function AdminPartido({
       </PageTitle>
       <Flash searchParams={sp} />
 
-      <div className="mb-6">
+      <div className="mb-6 space-y-6">
+        <LiveControlPanel match={match} home={home} away={away} />
         <AiActaScanner matchId={match.id} />
       </div>
 

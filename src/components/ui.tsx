@@ -113,10 +113,13 @@ export function MatchRow({
   const home = teams.get(match.homeTeamId);
   const away = teams.get(match.awayTeamId);
   const played = match.status === "played";
+  const inProgress = match.status === "in_progress";
   return (
     <Link
       href={href ?? `/partidos/${match.id}`}
-      className="group grid grid-cols-[1fr_auto_1fr] items-center gap-2 sm:gap-3 rounded-xl px-2 sm:px-3 py-2.5 sm:py-3 transition hover:bg-emerald-50 active:bg-emerald-100/50"
+      className={`group grid grid-cols-[1fr_auto_1fr] items-center gap-2 sm:gap-3 rounded-xl px-2 sm:px-3 py-2.5 sm:py-3 transition ${
+        inProgress ? "bg-rose-50/80 ring-1 ring-rose-300 hover:bg-rose-100/70" : "hover:bg-emerald-50 active:bg-emerald-100/50"
+      }`}
     >
       <div className="flex min-w-0 items-center justify-end gap-1.5 sm:gap-2 text-right">
         <span className="truncate text-xs sm:text-sm font-semibold text-slate-800">
@@ -125,10 +128,22 @@ export function MatchRow({
         <TeamBadge team={home} size="sm" />
       </div>
       <div className="flex min-w-[70px] sm:min-w-[88px] flex-col items-center">
-        {played ? (
-          <span className="rounded-lg bg-slate-900 px-2 sm:px-3 py-0.5 sm:py-1 font-mono text-base sm:text-lg font-bold text-white shadow-xs">
-            {match.homeScore} - {match.awayScore}
-          </span>
+        {played || inProgress ? (
+          <div className="flex flex-col items-center">
+            {inProgress && (
+              <span className="mb-0.5 inline-flex items-center gap-1 rounded-full bg-rose-600 px-1.5 py-0.2 text-[9px] font-black uppercase text-white animate-pulse">
+                <span className="h-1.5 w-1.5 rounded-full bg-white" />
+                EN VIVO
+              </span>
+            )}
+            <span
+              className={`rounded-lg px-2 sm:px-3 py-0.5 sm:py-1 font-mono text-base sm:text-lg font-bold text-white shadow-xs ${
+                inProgress ? "bg-rose-600 ring-2 ring-rose-400" : "bg-slate-900"
+              }`}
+            >
+              {match.homeScore ?? 0} - {match.awayScore ?? 0}
+            </span>
+          </div>
         ) : (
           <span
             className={`rounded-lg px-2 sm:px-3 py-0.5 sm:py-1 text-[11px] sm:text-xs font-semibold ${match.status === "postponed" ? "bg-amber-100 text-amber-800" : "bg-slate-100 text-slate-600"}`}

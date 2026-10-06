@@ -1,6 +1,6 @@
 export type EventType = "goal" | "own_goal" | "yellow" | "red";
 
-export type MatchStatus = "scheduled" | "played" | "postponed";
+export type MatchStatus = "scheduled" | "in_progress" | "played" | "postponed";
 
 export interface Team {
   id: string;
@@ -65,6 +65,7 @@ export const EVENT_LABELS: Record<EventType, string> = {
 
 export const STATUS_LABELS: Record<MatchStatus, string> = {
   scheduled: "Pendiente",
+  in_progress: "🔴 EN DIRECTO",
   played: "Finalizado",
   postponed: "Aplazado",
 };

@@ -15,11 +15,14 @@ export default async function PanelLayout({ children }: { children: React.ReactN
   const links = isAdmin
     ? [
         { href: "/admin", label: "Resumen" },
+        { href: "/admin?tab=mesa", label: "📷 Escáner de Mesa" },
         { href: "/admin/partidos", label: "Partidos y actas" },
         { href: "/admin/equipos", label: "Equipos y jugadores" },
         { href: "/admin/ajustes", label: "Ajustes" },
       ]
-    : [];
+    : [
+        { href: "/admin", label: "📷 Mesa Oficial" },
+      ];
 
   return (
     <div>

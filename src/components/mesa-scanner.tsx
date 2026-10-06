@@ -6,6 +6,7 @@ import { extractActaData, saveActaReviewed } from "@/app/actions";
 import { formatDate } from "@/lib/stats";
 import type { ExtractedActaEvent } from "@/lib/ai-acta";
 import { compressImage } from "@/lib/image-compress";
+import { LiveControlPanel } from "./live-control-panel";
 
 interface Props {
   matches: Match[];
@@ -359,6 +360,15 @@ export function MesaScanner({ matches, teams, players }: Props) {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Control Rápido en Vivo durante el partido */}
+      {selectedMatch && (
+        <LiveControlPanel
+          match={selectedMatch}
+          home={homeTeam || undefined}
+          away={awayTeam || undefined}
+        />
       )}
 
       {/* 2. Subida de la foto del acta */}

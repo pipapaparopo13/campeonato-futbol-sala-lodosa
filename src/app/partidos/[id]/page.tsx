@@ -33,6 +33,7 @@ export default async function ActaPage({ params }: Props) {
   const away = teams.get(match.awayTeamId);
   const events = sortEvents(match.events);
   const played = match.status === "played";
+  const inProgress = match.status === "in_progress";
 
   const sideEvents = (side: "home" | "away") =>
     events.filter((e) => {
@@ -66,8 +67,18 @@ export default async function ActaPage({ params }: Props) {
       <section className="overflow-hidden rounded-2xl bg-slate-900 text-white shadow-lg">
         <div className="bg-white/5 px-5 py-2 text-center text-xs font-semibold tracking-widest text-slate-300 uppercase">
           Acta Oficial de Partido · {match.competition === "copa" ? `Copa (${match.stage || "Jornada"})` : "Liga Regular"} · Jornada {match.round} ·{" "}
-          <span className={played ? "text-emerald-400" : match.status === "postponed" ? "text-amber-400" : ""}>
-            {STATUS_LABELS[match.status]}
+          <span
+            className={
+              inProgress
+                ? "inline-flex items-center gap-1 rounded-full bg-rose-600 px-2 py-0.5 text-white font-black animate-pulse"
+                : played
+                  ? "text-emerald-400"
+                  : match.status === "postponed"
+                    ? "text-amber-400"
+                    : ""
+            }
+          >
+            {inProgress ? "🔴 EN DIRECTO" : STATUS_LABELS[match.status]}
           </span>
         </div>
         <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 sm:gap-4 px-3 sm:px-4 py-5 sm:py-8">
@@ -79,11 +90,11 @@ export default async function ActaPage({ params }: Props) {
             <span className="text-[10px] sm:text-xs text-slate-400">Local</span>
           </div>
           <div className="text-center font-mono text-3xl font-black sm:text-5xl md:text-6xl px-1 sm:px-2">
-            {played ? (
+            {played || inProgress ? (
               <>
-                {match.homeScore}
+                {match.homeScore ?? 0}
                 <span className="mx-1.5 sm:mx-2 text-slate-500">-</span>
-                {match.awayScore}
+                {match.awayScore ?? 0}
               </>
             ) : (
               <span className="text-xl text-slate-400 sm:text-3xl">{match.time || "vs"}</span>

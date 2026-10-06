@@ -39,7 +39,7 @@ function done(path: string, message?: string): never {
 }
 
 const EVENT_TYPES: EventType[] = ["goal", "own_goal", "yellow", "red"];
-const STATUSES: MatchStatus[] = ["scheduled", "played", "postponed"];
+const STATUSES: MatchStatus[] = ["scheduled", "in_progress", "played", "postponed"];
 
 // ---------- sesión ----------
 
@@ -254,8 +254,12 @@ export async function updateMatch(fd: FormData) {
   if (homeTeamId === awayTeamId) fail(back, "Elige dos equipos distintos.");
   const statusRaw = str(fd, "status") as MatchStatus;
   const status = STATUSES.includes(statusRaw) ? statusRaw : "scheduled";
-  const homeScore = intOrNull(fd, "homeScore");
-  const awayScore = intOrNull(fd, "awayScore");
+  let homeScore = intOrNull(fd, "homeScore");
+  let awayScore = intOrNull(fd, "awayScore");
+  if (status === "in_progress" && (homeScore === null || awayScore === null)) {
+    homeScore = homeScore ?? 0;
+    awayScore = awayScore ?? 0;
+  }
   if (status === "played" && (homeScore === null || awayScore === null)) {
     fail(back, "Para marcar el partido como finalizado, introduce el resultado.");
   }
@@ -308,8 +312,65 @@ export async function addEvent(fd: FormData) {
       return "Ese jugador no pertenece a ninguno de los dos equipos.";
     }
     m.events.push({ id: newId(), type, playerId, minute });
+    // Si es un gol y el partido está en juego o finalizado, autoincrementar el marcador correspondiente
+    if (type === "goal") {
+      if (p.teamId === m.homeTeamId) {
+        m.homeScore = (m.homeScore ?? 0) + 1;
+      } else if (p.teamId === m.awayTeamId) {
+        m.awayScore = (m.awayScore ?? 0) + 1;
+      }
+    } else if (type === "own_goal") {
+      // Autogol suma al rival
+      if (p.teamId === m.homeTeamId) {
+        m.awayScore = (m.awayScore ?? 0) + 1;
+      } else if (p.teamId === m.awayTeamId) {
+        m.homeScore = (m.homeScore ?? 0) + 1;
+      }
+    }
     return null;
   });
+  if (err) fail(back, err);
+  done(back);
+}
+
+// Acción rápida para Mesa y Admin: marcar en directo / actualizar marcador / finalizar
+export async function quickLiveUpdate(fd: FormData) {
+  await requireEditorOrReferee();
+  const matchId = str(fd, "matchId");
+  const actionType = str(fd, "actionType"); // "start_live" | "score_delta" | "set_status"
+  const side = str(fd, "side") as "home" | "away";
+  const delta = intOrNull(fd, "delta") ?? 1;
+  const newStatus = str(fd, "newStatus") as MatchStatus;
+  const back = str(fd, "redirectTo") || `/admin/partidos/${matchId}`;
+
+  const err = await mutate((db) => {
+    const m = db.matches.find((x) => x.id === matchId);
+    if (!m) return "Partido no encontrado.";
+
+    if (actionType === "start_live") {
+      m.status = "in_progress";
+      if (m.homeScore === null) m.homeScore = 0;
+      if (m.awayScore === null) m.awayScore = 0;
+    } else if (actionType === "score_delta") {
+      if (m.status === "scheduled") m.status = "in_progress";
+      if (side === "home") {
+        m.homeScore = Math.max(0, (m.homeScore ?? 0) + delta);
+      } else if (side === "away") {
+        m.awayScore = Math.max(0, (m.awayScore ?? 0) + delta);
+      }
+    } else if (actionType === "set_status") {
+      if (STATUSES.includes(newStatus)) {
+        m.status = newStatus;
+        if (newStatus === "in_progress") {
+          if (m.homeScore === null) m.homeScore = 0;
+          if (m.awayScore === null) m.awayScore = 0;
+        }
+      }
+    }
+
+    return null;
+  });
+
   if (err) fail(back, err);
   done(back);
 }
