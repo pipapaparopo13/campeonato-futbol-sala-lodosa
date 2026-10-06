@@ -4,6 +4,7 @@ import { getDB } from "@/lib/db";
 import { formatDate, sortMatches, teamMap } from "@/lib/stats";
 import { Card, Empty, Flash, MatchRow, PageTitle } from "@/components/ui";
 import { ConfirmButton } from "@/components/confirm-button";
+import { RegenerarCalendarioSection } from "@/components/regenerar-calendario-section";
 import { CUP_ROUNDS } from "@/lib/calendar-plan";
 
 import { requireAdmin } from "@/lib/auth";
@@ -91,9 +92,9 @@ export default async function AdminPartidos({
         )}
       </div>
 
-      <div className="mb-6 grid gap-6 lg:grid-cols-2">
-        <Card title="Añadir partido al calendario">
-          <form action={createMatch} className="grid grid-cols-2 gap-3">
+      <div className="mb-6">
+        <Card title="Añadir partido individual al calendario">
+          <form action={createMatch} className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <div>
               <label className="label" htmlFor="competition">Competición</label>
               <select id="competition" name="competition" className="input font-semibold">
@@ -109,22 +110,10 @@ export default async function AdminPartidos({
                 type="number"
                 min={1}
                 max={18}
-                defaultValue={1}
+                defaultValue={nextRound}
                 required
                 className="input font-semibold"
               />
-            </div>
-            <div>
-              <label className="label" htmlFor="homeTeamId">Equipo Local</label>
-              <select id="homeTeamId" name="homeTeamId" required className="input">
-                {db.teams.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="label" htmlFor="awayTeamId">Equipo Visitante</label>
-              <select id="awayTeamId" name="awayTeamId" required className="input" defaultValue={db.teams[1]?.id}>
-                {db.teams.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
-              </select>
             </div>
             <div>
               <label className="label" htmlFor="date">Fecha</label>
@@ -141,6 +130,18 @@ export default async function AdminPartidos({
               />
             </div>
             <div className="col-span-2">
+              <label className="label" htmlFor="homeTeamId">Equipo Local</label>
+              <select id="homeTeamId" name="homeTeamId" required className="input">
+                {db.teams.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
+              </select>
+            </div>
+            <div className="col-span-2">
+              <label className="label" htmlFor="awayTeamId">Equipo Visitante</label>
+              <select id="awayTeamId" name="awayTeamId" required className="input" defaultValue={db.teams[1]?.id}>
+                {db.teams.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
+              </select>
+            </div>
+            <div className="col-span-2 md:col-span-4">
               <label className="label" htmlFor="venue">Lugar / Pabellón</label>
               <input
                 id="venue"
@@ -149,24 +150,9 @@ export default async function AdminPartidos({
                 className="input"
               />
             </div>
-            <div className="col-span-2 pt-1">
+            <div className="col-span-2 md:col-span-4 pt-1">
               <button className="btn w-full font-bold">+ Crear y Añadir Partido</button>
             </div>
-          </form>
-        </Card>
-
-        <Card title="Regenerar calendario automático (opcional)">
-          <form action={generateFixtures} className="space-y-3 text-sm">
-            <p className="text-slate-500">
-              Permite reiniciar y regenerar las jornadas de liga desde cero con los {db.teams.length} equipos.
-            </p>
-            <label className="flex items-center gap-2">
-              <input type="checkbox" name="doubleRound" defaultChecked className="h-4 w-4" /> Ida y vuelta (18 jornadas)
-            </label>
-            <label className="flex items-center gap-2 text-red-700">
-              <input type="checkbox" name="replace" className="h-4 w-4" /> Borrar los partidos existentes (y sus actas)
-            </label>
-            <button className="btn-secondary">Regenerar liga</button>
           </form>
         </Card>
       </div>
@@ -239,6 +225,9 @@ export default async function AdminPartidos({
           </div>
         )}
       </section>
+
+      {/* Zona de peligro: Regeneración automática del calendario al final del todo */}
+      <RegenerarCalendarioSection teamsCount={db.teams.length} />
     </>
   );
 }
