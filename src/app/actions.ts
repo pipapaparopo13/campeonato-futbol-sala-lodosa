@@ -380,11 +380,32 @@ export async function deleteEvent(fd: FormData) {
   await requireEditorOrReferee();
   const matchId = str(fd, "matchId");
   const eventId = str(fd, "eventId");
+  const back = str(fd, "redirectTo") || `/admin/partidos/${matchId}`;
   await mutate((db) => {
     const m = db.matches.find((x) => x.id === matchId);
-    if (m) m.events = m.events.filter((e) => e.id !== eventId);
+    if (!m) return;
+    const ev = m.events.find((e) => e.id === eventId);
+    if (ev) {
+      const p = db.players.find((x) => x.id === ev.playerId);
+      if (p) {
+        if (ev.type === "goal") {
+          if (p.teamId === m.homeTeamId) {
+            m.homeScore = Math.max(0, (m.homeScore ?? 0) - 1);
+          } else if (p.teamId === m.awayTeamId) {
+            m.awayScore = Math.max(0, (m.awayScore ?? 0) - 1);
+          }
+        } else if (ev.type === "own_goal") {
+          if (p.teamId === m.homeTeamId) {
+            m.awayScore = Math.max(0, (m.awayScore ?? 0) - 1);
+          } else if (p.teamId === m.awayTeamId) {
+            m.homeScore = Math.max(0, (m.homeScore ?? 0) - 1);
+          }
+        }
+      }
+      m.events = m.events.filter((e) => e.id !== eventId);
+    }
   });
-  done(`/admin/partidos/${matchId}`);
+  done(back);
 }
 
 // ---------- copa ----------

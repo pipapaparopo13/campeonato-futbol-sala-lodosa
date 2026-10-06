@@ -368,6 +368,8 @@ export function MesaScanner({ matches, teams, players }: Props) {
           match={selectedMatch}
           home={homeTeam || undefined}
           away={awayTeam || undefined}
+          players={players}
+          redirectTo="/admin"
         />
       )}
 

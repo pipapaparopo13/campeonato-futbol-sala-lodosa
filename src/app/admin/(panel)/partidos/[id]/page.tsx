@@ -62,7 +62,13 @@ export default async function AdminPartido({
       <Flash searchParams={sp} />
 
       <div className="mb-6 space-y-6">
-        <LiveControlPanel match={match} home={home} away={away} />
+        <LiveControlPanel
+          match={match}
+          home={home}
+          away={away}
+          players={db.players}
+          redirectTo={`/admin/partidos/${match.id}`}
+        />
         <AiActaScanner matchId={match.id} />
       </div>
 
