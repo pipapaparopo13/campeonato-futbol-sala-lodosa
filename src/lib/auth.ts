@@ -68,25 +68,29 @@ export function checkCredentials(
 }
 
 export async function getSession(): Promise<UserSession | null> {
-  const value = (await cookies()).get(COOKIE)?.value;
-  if (!value) return null;
+  try {
+    const value = (await cookies()).get(COOKIE)?.value;
+    if (!value) return null;
 
-  const parts = value.split(".");
-  if (parts.length !== 4) return null;
-  const [exp, role, usernameEnc, sig] = parts;
-  if (!exp || !role || !usernameEnc || !sig) return null;
+    const parts = value.split(".");
+    if (parts.length !== 4) return null;
+    const [exp, role, usernameEnc, sig] = parts;
+    if (!exp || !role || !usernameEnc || !sig) return null;
 
-  const payload = `${exp}.${role}.${usernameEnc}`;
-  if (!safeEqual(sig, sign(payload))) return null;
-  if (Number(exp) <= Date.now()) return null;
+    const payload = `${exp}.${role}.${usernameEnc}`;
+    if (!safeEqual(sig, sign(payload))) return null;
+    if (Number(exp) <= Date.now()) return null;
 
-  const validRoles: UserRole[] = ["admin", "arbitro"];
-  if (!validRoles.includes(role as UserRole)) return null;
+    const validRoles: UserRole[] = ["admin", "arbitro"];
+    if (!validRoles.includes(role as UserRole)) return null;
 
-  return {
-    role: role as UserRole,
-    username: decodeURIComponent(usernameEnc),
-  };
+    return {
+      role: role as UserRole,
+      username: decodeURIComponent(usernameEnc),
+    };
+  } catch {
+    return null;
+  }
 }
 
 export async function isAdmin(): Promise<boolean> {

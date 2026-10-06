@@ -48,6 +48,8 @@ function seed(): DB {
   };
 }
 
+import initialData from "../../data/db.json";
+
 function getKvConfig() {
   const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
   const token = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
@@ -75,18 +77,23 @@ async function readKv(url: string, token: string): Promise<DB | null> {
 }
 
 async function writeKv(url: string, token: string, db: DB): Promise<void> {
-  const res = await fetch(`${url}/set/lodosa_db`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(db),
-    cache: "no-store",
-  });
-  if (!res.ok) {
-    const text = await res.text();
-    console.error("Error escribiendo en KV:", res.status, text);
+  try {
+    // Usar la sintaxis oficial de Upstash REST: POST / con array ["SET", key, value]
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(["SET", "lodosa_db", JSON.stringify(db)]),
+      cache: "no-store",
+    });
+    if (!res.ok) {
+      const text = await res.text();
+      console.error("Error escribiendo en KV:", res.status, text);
+    }
+  } catch (err) {
+    console.error("Error conectando con KV:", err);
   }
 }
 
@@ -96,22 +103,17 @@ async function writeLocalFile(db: DB) {
     const tmp = `${DB_PATH}.${process.pid}.tmp`;
     await fs.writeFile(tmp, JSON.stringify(db, null, 2), "utf8");
     await fs.rename(tmp, DB_PATH);
-  } catch (err) {
-    console.warn("No se pudo escribir en el sistema de archivos local:", err);
+  } catch {
+    // Ignorar en entornos de solo lectura como Vercel
   }
 }
 
-async function readLocalFile(): Promise<DB> {
+async function readLocalFile(): Promise<DB | null> {
   try {
     const raw = await fs.readFile(DB_PATH, "utf8");
     return JSON.parse(raw) as DB;
-  } catch (err) {
-    if ((err as NodeJS.ErrnoException).code === "ENOENT") {
-      const db = seed();
-      await writeLocalFile(db);
-      return db;
-    }
-    throw err;
+  } catch {
+    return null;
   }
 }
 
@@ -125,20 +127,31 @@ async function writeRaw(db: DB) {
 }
 
 async function readRaw(): Promise<DB> {
-  const kv = getKvConfig();
-  if (kv) {
-    const remote = await readKv(kv.url, kv.token);
-    if (remote) return remote;
+  try {
+    const kv = getKvConfig();
+    if (kv) {
+      const remote = await readKv(kv.url, kv.token);
+      if (remote && remote.teams && remote.teams.length > 0) return remote;
+      // Primera vez con KV: volcar datos iniciales
+      const local = (await readLocalFile()) || (initialData as DB);
+      await writeKv(kv.url, kv.token, local);
+      return local;
+    }
     const local = await readLocalFile();
-    await writeKv(kv.url, kv.token, local);
-    return local;
+    return local || (initialData as DB);
+  } catch (err) {
+    console.error("Error en lectura de base de datos:", err);
+    return initialData as DB;
   }
-  return readLocalFile();
 }
 
 /** Lectura para páginas: siempre en tiempo de petición (datos frescos). */
 export async function getDB(): Promise<DB> {
-  await connection();
+  try {
+    await connection();
+  } catch {
+    // Evitar fallos de contexto
+  }
   return readRaw();
 }
 
