@@ -1,10 +1,18 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import Link from "next/link";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { getDB } from "@/lib/db";
 import { isAdmin } from "@/lib/auth";
 import { MainNav } from "@/components/nav";
+import { InstallAppBanner } from "@/components/install-banner";
+
+export const viewport: Viewport = {
+  themeColor: "#047857",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+};
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -21,6 +29,19 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: { default: settings.name, template: `%s · ${settings.name}` },
     description: `Resultados, clasificación, jugadores, tarjetas y actas del ${settings.name} ${settings.season}.`,
+    manifest: "/manifest.webmanifest",
+    appleWebApp: {
+      capable: true,
+      statusBarStyle: "black-translucent",
+      title: "FS Lodosa",
+    },
+    icons: {
+      icon: [
+        { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+        { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+      ],
+      apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+    },
   };
 }
 
@@ -73,6 +94,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
             </Link>
           </div>
         </footer>
+        <InstallAppBanner />
       </body>
     </html>
   );
