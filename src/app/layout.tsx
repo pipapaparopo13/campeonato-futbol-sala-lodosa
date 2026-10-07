@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { getDB } from "@/lib/db";
-import { isAdmin } from "@/lib/auth";
+import { getSession } from "@/lib/auth";
 import { MainNav } from "@/components/nav";
 import { InstallAppBanner } from "@/components/install-banner";
 
@@ -46,7 +46,8 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
-  const [{ settings }, admin] = await Promise.all([getDB(), isAdmin()]);
+  const [{ settings }, session] = await Promise.all([getDB(), getSession()]);
+  const userRole = session?.role;
   return (
     <html
       lang="es"
@@ -72,15 +73,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
                 </span>
               </Link>
               <div className="flex items-center gap-2 shrink-0">
-                {admin && (
-                  <Link
-                    href="/admin"
-                    className="hidden md:inline-flex rounded-lg bg-amber-400 px-3 py-1.5 text-xs font-bold text-amber-950 shadow hover:bg-amber-300"
-                  >
-                    Panel del editor
-                  </Link>
-                )}
-                <MainNav admin={admin} />
+                <MainNav admin={userRole === "admin"} role={userRole} />
               </div>
             </div>
           </div>
@@ -93,8 +86,8 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
             <span>
               {settings.name} · {settings.location}
             </span>
-            <Link href={admin ? "/admin" : "/admin/login"} className="hover:text-slate-600">
-              {admin ? "Panel del editor" : "Acceso editor"}
+            <Link href={userRole ? "/admin" : "/admin/login"} className="hover:text-slate-600">
+              {userRole ? "Panel del editor" : "Acceso editor"}
             </Link>
           </div>
         </footer>

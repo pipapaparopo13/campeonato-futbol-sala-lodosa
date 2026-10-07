@@ -33,7 +33,7 @@ export default async function LoginPage({
             </label>
             <select id="username" name="username" className="input">
               <option value="organizador">Organizador (Admin)</option>
-              <option value="mesa">Mesa (Javi Mesa)</option>
+              <option value="mesa">Mesa Oficial</option>
             </select>
           </div>
 

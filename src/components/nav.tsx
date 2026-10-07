@@ -73,11 +73,14 @@ const LINKS = [
 
 interface Props {
   admin?: boolean;
+  role?: "admin" | "arbitro" | null;
 }
 
-export function MainNav({ admin }: Props) {
+export function MainNav({ admin, role }: Props) {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
+  const isLoggedIn = Boolean(role || admin);
+  const isMesaOnly = role === "arbitro";
 
   // Cerrar menú al cambiar de ruta
   useEffect(() => {
@@ -100,12 +103,19 @@ export function MainNav({ admin }: Props) {
     <>
       {/* Botón hamburguesa (solo visible en pantallas móviles/medianas) */}
       <div className="flex items-center gap-2 md:hidden">
-        {admin && (
+        {isLoggedIn ? (
           <Link
             href="/admin"
             className="rounded-lg bg-amber-400 px-2.5 py-1.5 text-xs font-bold text-amber-950 shadow hover:bg-amber-300"
           >
-            Panel
+            {isMesaOnly ? "Mesa" : "Panel"}
+          </Link>
+        ) : (
+          <Link
+            href="/admin/login"
+            className="rounded-lg bg-white/15 px-2.5 py-1.5 text-xs font-bold text-white hover:bg-white/25 transition"
+          >
+            Acceso
           </Link>
         )}
         <button
@@ -144,6 +154,26 @@ export function MainNav({ admin }: Props) {
             </Link>
           );
         })}
+
+        {/* Botón de acceso / panel en el menú superior de escritorio */}
+        {isLoggedIn ? (
+          <Link
+            href="/admin"
+            className="ml-2 whitespace-nowrap rounded-lg bg-amber-400 px-3 py-1.5 text-xs font-black text-amber-950 shadow-sm hover:bg-amber-300 transition"
+          >
+            {isMesaOnly ? "Mesa Oficial" : "Panel Admin"}
+          </Link>
+        ) : (
+          <Link
+            href="/admin/login"
+            className="ml-2 flex items-center gap-1.5 whitespace-nowrap rounded-lg border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-bold text-white hover:bg-white/20 transition"
+          >
+            <svg className="h-3.5 w-3.5 text-emerald-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+            </svg>
+            <span>Acceso Mesa / Admin</span>
+          </Link>
+        )}
       </nav>
 
       {/* Menú desplegable Móvil (Full-screen Drawer animado) */}
@@ -192,8 +222,8 @@ export function MainNav({ admin }: Props) {
               })}
             </nav>
 
-            {admin && (
-              <div className="mt-5 border-t border-white/15 pt-4">
+            <div className="mt-5 border-t border-white/15 pt-4">
+              {isLoggedIn ? (
                 <Link
                   href="/admin"
                   onClick={() => setIsOpen(false)}
@@ -203,10 +233,21 @@ export function MainNav({ admin }: Props) {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                     <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth={2} />
                   </svg>
-                  <span>Acceder al Panel de Gestión</span>
+                  <span>{isMesaOnly ? "Acceder a Mesa Oficial" : "Panel de Gestión Admin"}</span>
                 </Link>
-              </div>
-            )}
+              ) : (
+                <Link
+                  href="/admin/login"
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center justify-center gap-2 rounded-xl bg-white/15 py-3 text-center text-sm font-bold text-white hover:bg-white/20 transition active:scale-95"
+                >
+                  <svg className="h-4 w-4 text-emerald-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                  </svg>
+                  <span>Acceso Mesa / Organizador</span>
+                </Link>
+              )}
+            </div>
           </div>
         </div>
       )}

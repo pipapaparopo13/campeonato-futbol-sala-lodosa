@@ -19,7 +19,7 @@ export default async function AdminHome({
     return (
       <div className="mx-auto max-w-2xl space-y-4">
         <PageTitle subtitle="Mesa de control de Lodosa. Selecciona el partido de la jornada y sube la foto del acta con IA o anota goles y tarjetas.">
-          {session?.role === "arbitro" ? "Mesa Oficial · Javi Mesa" : "Escáner de Mesa Oficial"}
+          {session?.role === "arbitro" ? "Mesa Oficial" : "Escáner de Mesa Oficial"}
         </PageTitle>
         <Flash searchParams={sp} />
         <MesaScanner

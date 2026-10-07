@@ -28,7 +28,7 @@ export default async function PanelLayout({ children }: { children: React.ReactN
     <div>
       <div className="mb-6 flex items-center gap-2 overflow-x-auto rounded-2xl bg-amber-50 p-2 ring-1 ring-amber-200">
         <span className="shrink-0 rounded-md bg-amber-200/80 px-2.5 py-1 text-xs font-bold tracking-wide text-amber-900 uppercase">
-          {isAdmin ? "Admin" : "Mesa: Javi"}
+          {isAdmin ? "Admin" : "Mesa"}
         </span>
         <div className="flex items-center gap-1 overflow-x-auto">
           {links.map((l) => (

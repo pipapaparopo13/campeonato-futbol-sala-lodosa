@@ -42,7 +42,7 @@ export function checkCredentials(
   // Si especifica usuario mesa / javi mesa / árbitro
   if (user === "arbitro" || user === "mesa" || user === "javimesa" || user === "javi") {
     if (safeEqual(password, arbitroPass)) {
-      return { role: "arbitro", username: "Javi Mesa" };
+      return { role: "arbitro", username: "Mesa" };
     }
     return null;
   }
@@ -61,7 +61,7 @@ export function checkCredentials(
   }
 
   if (safeEqual(password, arbitroPass)) {
-    return { role: "arbitro", username: "Javi Mesa" };
+    return { role: "arbitro", username: "Mesa" };
   }
 
   return null;
