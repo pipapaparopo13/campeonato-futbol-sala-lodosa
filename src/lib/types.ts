@@ -40,6 +40,9 @@ export interface Match {
   events: MatchEvent[];
   competition?: "liga" | "copa";
   stage?: string;
+  mvpVotes?: Record<string, number>; // playerId -> numero de votos
+  finishedAt?: string; // ISO string de cuando finalizó
+  manualMvpPlayerId?: string; // Opcional por si el admin fija uno
 }
 
 export interface Settings {

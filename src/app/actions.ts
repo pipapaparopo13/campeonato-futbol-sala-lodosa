@@ -278,6 +278,9 @@ export async function updateMatch(fd: FormData) {
     m.status = status;
     m.homeScore = homeScore;
     m.awayScore = awayScore;
+    if (status === "played" && !m.finishedAt) {
+      m.finishedAt = new Date().toISOString();
+    }
     m.referee = str(fd, "referee", 120);
     m.notes = str(fd, "notes", 4000);
     if (comp === "liga" || comp === "copa") m.competition = comp;
@@ -664,5 +667,58 @@ export async function scanActaPhoto(fd: FormData) {
     "¡Acta analizada con IA! Marcador, goleadores, minutos y tarjetas rellenados automáticamente.",
   );
 }
+
+export async function voteMvp(fd: FormData) {
+  const matchId = str(fd, "matchId");
+  const playerId = str(fd, "playerId");
+  const back = `/partidos/${matchId}`;
+
+  if (!matchId || !playerId) {
+    fail(back, "Selección inválida para votar al MVP.");
+  }
+
+  const err = await mutate((db) => {
+    const m = db.matches.find((x) => x.id === matchId);
+    if (!m) return "Partido no encontrado.";
+    if (m.status !== "played") {
+      return "La votación del MVP solo está disponible una vez finalizado el partido.";
+    }
+
+    // Comprobar ventana de 30 minutos según fecha y hora del partido
+    const [year, month, day] = (m.date || "").split("-").map(Number);
+    const [hour, minute] = (m.time || "").split(":").map(Number);
+
+    if (!year || !month || !day || isNaN(hour) || isNaN(minute)) {
+      // Si no tiene fecha/hora fija, usamos finishedAt si existe
+      if (m.finishedAt) {
+        const finishedTime = new Date(m.finishedAt).getTime();
+        const diffMs = Date.now() - finishedTime;
+        if (diffMs > 30 * 60 * 1000) {
+          return "La votación de MVP ha finalizado (han transcurrido más de 30 minutos).";
+        }
+      }
+    } else {
+      // 50 minutos de partido (dos partes de 25 min) + 5 min de descanso
+      const matchEndTime = new Date(year, month - 1, day, hour, minute + 55, 0).getTime();
+      const votingEndTime = matchEndTime + 30 * 60 * 1000;
+      const now = Date.now();
+
+      if (now < matchEndTime) {
+        // Todavía no ha terminado según horario oficial
+        // Si ya está puesto como 'played', permitimos votar
+      } else if (now > votingEndTime) {
+        return "La votación de MVP para este partido ya se ha cerrado (plazo de 30 minutos agotado).";
+      }
+    }
+
+    if (!m.mvpVotes) m.mvpVotes = {};
+    m.mvpVotes[playerId] = (m.mvpVotes[playerId] ?? 0) + 1;
+    return null;
+  });
+
+  if (err) fail(back, err);
+  done(back, "¡Voto registrado correctamente!");
+}
+
 
 

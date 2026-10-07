@@ -7,6 +7,7 @@ import { eventSide, formatDate, playerMap, sortEvents, teamMap } from "@/lib/sta
 import { EVENT_LABELS, STATUS_LABELS } from "@/lib/types";
 import { Card, Empty, EventIcon, TeamBadge, TeamName } from "@/components/ui";
 import { ShareMatchButtons } from "@/components/share-buttons";
+import { MatchMvpSection } from "@/components/match-mvp-section";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -41,6 +42,9 @@ export default async function ActaPage({ params }: Props) {
       const teamId = side === "home" ? match.homeTeamId : match.awayTeamId;
       return p?.teamId === teamId;
     });
+
+  const homePlayers = db.players.filter((p) => p.teamId === match.homeTeamId);
+  const awayPlayers = db.players.filter((p) => p.teamId === match.awayTeamId);
 
   return (
     <div className="space-y-6">
@@ -122,6 +126,21 @@ export default async function ActaPage({ params }: Props) {
           ))}
         </dl>
       </section>
+
+      {/* Votación y distintivo MVP del Partido */}
+      <MatchMvpSection
+        matchId={match.id}
+        matchStatus={match.status}
+        matchDate={match.date}
+        matchTime={match.time}
+        finishedAt={match.finishedAt}
+        homeTeam={home}
+        awayTeam={away}
+        homePlayers={homePlayers}
+        awayPlayers={awayPlayers}
+        mvpVotes={match.mvpVotes}
+        manualMvpPlayerId={match.manualMvpPlayerId}
+      />
 
       <div className="grid gap-6 md:grid-cols-2">
         {(["home", "away"] as const).map((side) => {
