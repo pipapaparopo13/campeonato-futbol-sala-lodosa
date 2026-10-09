@@ -186,49 +186,110 @@ export default async function CopaPage() {
 
       {/* Fase Final (Cuadro de Honor) */}
       <section className="space-y-4">
-        <h2 className="border-b border-slate-200 pb-2 text-xl font-bold text-slate-900">
-          Fase Final · Eliminatorias
-        </h2>
-        <div className="grid gap-4 md:grid-cols-2">
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <span className="rounded-md bg-emerald-100 px-2.5 py-1 text-xs font-bold text-emerald-900">
-              Sábado 15 de mayo de 2027
-            </span>
-            <h3 className="mt-3 text-lg font-extrabold text-slate-900">
-              Semifinales de Copa
-            </h3>
-            <div className="mt-3 space-y-2 text-sm text-slate-700">
-              <div className="flex items-center justify-between rounded-lg bg-slate-50 p-2.5">
-                <span>1º Grupo A vs 2º Grupo B</span>
-                <span className="text-xs font-mono text-slate-400">17:00</span>
-              </div>
-              <div className="flex items-center justify-between rounded-lg bg-slate-50 p-2.5">
-                <span>1º Grupo B vs 2º Grupo A</span>
-                <span className="text-xs font-mono text-slate-400">18:30</span>
-              </div>
-            </div>
-            <p className="mt-3 text-xs text-slate-500">
-              En caso de empate al final del partido: tanda de penaltis directa según el Artículo 13 del Reglamento.
+        <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-slate-200 pb-2">
+          <div>
+            <h2 className="text-xl font-bold text-slate-900">
+              Fase Final · Eliminatorias
+            </h2>
+            <p className="text-xs text-slate-500">
+              Cruces oficiales: 1º Grupo A vs 2º Grupo B, y 1º Grupo B vs 2º Grupo A. Los ganadores disputan la Gran Final.
             </p>
           </div>
-
-          <div className="rounded-2xl border-2 border-emerald-500 bg-gradient-to-br from-white to-emerald-50/50 p-5 shadow-sm">
-            <span className="rounded-md bg-emerald-700 px-2.5 py-1 text-xs font-bold text-white">
-              Sábado 22 de mayo de 2027
-            </span>
-            <h3 className="mt-3 text-lg font-black text-slate-900">
-              🏆 Gran Final de Copa de Lodosa
-            </h3>
-            <div className="mt-3 flex items-center justify-between rounded-xl bg-white p-4 shadow-xs ring-1 ring-emerald-200">
-              <span className="font-bold text-slate-800">Ganador Semifinal 1</span>
-              <span className="font-mono text-xs text-emerald-700">vs</span>
-              <span className="font-bold text-slate-800">Ganador Semifinal 2</span>
-            </div>
-            <p className="mt-3 text-xs text-slate-600 font-medium">
-              Entrega de trofeos al Campeón y Subcampeón de Copa en el Polideportivo Municipal de Lodosa.
-            </p>
-          </div>
+          <span className="text-xs font-semibold text-emerald-800 bg-emerald-100 px-2.5 py-1 rounded-full">
+            15 y 22 de mayo de 2027
+          </span>
         </div>
+
+        {(() => {
+          const firstA = groupARows[0]?.team;
+          const secondA = groupARows[1]?.team;
+          const firstB = groupBRows[0]?.team;
+          const secondB = groupBRows[1]?.team;
+
+          // Comprobar si la fase de grupos de copa ya terminó (todos los partidos de copa de j1 a j5 jugados)
+          const groupMatches = copaMatches.filter((m) => m.round <= 5);
+          const groupFinished = groupMatches.length === 20 && groupMatches.every((m) => m.status === "played");
+
+          return (
+            <div className="grid gap-6 md:grid-cols-2">
+              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <div className="flex items-center justify-between">
+                  <span className="rounded-md bg-emerald-100 px-2.5 py-1 text-xs font-bold text-emerald-900">
+                    Sábado 15 de mayo de 2027
+                  </span>
+                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                    Eliminatorias
+                  </span>
+                </div>
+                <h3 className="mt-3 text-lg font-extrabold text-slate-900">
+                  Semifinales de Copa
+                </h3>
+                <div className="mt-3 space-y-2.5 text-sm">
+                  {/* Semifinal 1 */}
+                  <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-3">
+                    <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 mb-1.5">
+                      <span>SEMIFINAL 1</span>
+                      <span className="font-mono text-slate-600">17:00 h</span>
+                    </div>
+                    <div className="flex items-center justify-between gap-2 font-bold text-slate-800">
+                      <span className="truncate">
+                        {groupFinished && firstA ? firstA.name : "1º Clasificado Grupo A"}
+                      </span>
+                      <span className="text-xs text-slate-400 font-normal">vs</span>
+                      <span className="truncate text-right">
+                        {groupFinished && secondB ? secondB.name : "2º Clasificado Grupo B"}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Semifinal 2 */}
+                  <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-3">
+                    <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 mb-1.5">
+                      <span>SEMIFINAL 2</span>
+                      <span className="font-mono text-slate-600">18:30 h</span>
+                    </div>
+                    <div className="flex items-center justify-between gap-2 font-bold text-slate-800">
+                      <span className="truncate">
+                        {groupFinished && firstB ? firstB.name : "1º Clasificado Grupo B"}
+                      </span>
+                      <span className="text-xs text-slate-400 font-normal">vs</span>
+                      <span className="truncate text-right">
+                        {groupFinished && secondA ? secondA.name : "2º Clasificado Grupo A"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <p className="mt-3 text-xs text-slate-500">
+                  En caso de empate al final del tiempo reglamentario: tanda de penaltis directa según el Artículo 23 del Reglamento.
+                </p>
+              </div>
+
+              <div className="rounded-2xl border-2 border-emerald-500 bg-gradient-to-br from-white via-emerald-50/40 to-teal-50/60 p-5 shadow-sm">
+                <div className="flex items-center justify-between">
+                  <span className="rounded-md bg-emerald-700 px-2.5 py-1 text-xs font-bold text-white">
+                    Sábado 22 de mayo de 2027
+                  </span>
+                  <span className="text-xs font-black text-emerald-800 uppercase tracking-wider">
+                    Partido Único
+                  </span>
+                </div>
+                <h3 className="mt-3 text-lg font-black text-slate-900">
+                  🏆 Gran Final de Copa de Lodosa
+                </h3>
+                <div className="mt-4 flex items-center justify-between rounded-xl bg-white p-4 shadow-xs ring-1 ring-emerald-200 text-sm">
+                  <span className="font-extrabold text-slate-800">Ganador Semifinal 1</span>
+                  <span className="font-mono text-xs font-black text-emerald-700 uppercase bg-emerald-100 px-2 py-0.5 rounded">
+                    VS
+                  </span>
+                  <span className="font-extrabold text-slate-800 text-right">Ganador Semifinal 2</span>
+                </div>
+                <div className="mt-4 rounded-lg bg-emerald-100/60 p-3 text-xs text-emerald-950 font-medium border border-emerald-200">
+                  🥇 El equipo vencedor se proclamará <strong>Campeón de la Copa de Lodosa 2026/27</strong> con entrega de trofeos en la pista.
+                </div>
+              </div>
+            </div>
+          );
+        })()}
       </section>
     </div>
   );
