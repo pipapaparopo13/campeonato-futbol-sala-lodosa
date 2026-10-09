@@ -92,32 +92,46 @@ export function RoundPosterModal({ matches, teams }: Props) {
       ctx.fillStyle = glowGrad;
       ctx.fillRect(0, 0, width, 500);
 
+      // Cargar logo oficial
+      const logoImg = await new Promise<HTMLImageElement | null>((resolve) => {
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.onload = () => resolve(img);
+        img.onerror = () => resolve(null);
+        img.src = "/logo.png";
+      });
+
       // 2. Cabecera superior
       ctx.textAlign = "center";
 
-      // Balón / Escudo emoji
-      ctx.font = "bold 56px system-ui, -apple-system, sans-serif";
-      ctx.fillText("⚽", width / 2, 110);
+      // Escudo oficial arriba (110x110 px)
+      if (logoImg) {
+        const logoSize = 100;
+        ctx.drawImage(logoImg, width / 2 - logoSize / 2, 40, logoSize, logoSize);
+      } else {
+        ctx.font = "bold 56px system-ui, -apple-system, sans-serif";
+        ctx.fillText("⚽", width / 2, 110);
+      }
 
       // Nombre del torneo
       ctx.fillStyle = "#34d399";
-      ctx.font = "bold 26px system-ui, -apple-system, sans-serif";
+      ctx.font = "bold 24px system-ui, -apple-system, sans-serif";
       ctx.letterSpacing = "2px";
-      ctx.fillText("CAMPEONATO FÚTBOL SALA LODOSA", width / 2, 160);
+      ctx.fillText("CAMPEONATO FÚTBOL SALA LODOSA", width / 2, 175);
 
       // Título de la tarjeta
       ctx.fillStyle = "#ffffff";
-      ctx.font = "900 48px system-ui, -apple-system, sans-serif";
+      ctx.font = "900 46px system-ui, -apple-system, sans-serif";
       const titleText = tab === "results" ? `RESULTADOS · JORNADA ${selectedRound}` : `PRÓXIMA JORNADA ${selectedRound}`;
-      ctx.fillText(titleText, width / 2, 225);
+      ctx.fillText(titleText, width / 2, 235);
 
       // Fecha y lugar
       ctx.fillStyle = "#94a3b8";
-      ctx.font = "600 24px system-ui, -apple-system, sans-serif";
+      ctx.font = "600 23px system-ui, -apple-system, sans-serif";
       ctx.fillText(
         `Polideportivo Municipal de Lodosa ${roundDate ? `· ${roundDate}` : ""}`,
         width / 2,
-        270
+        278
       );
 
       // Línea divisoria dorada/esmeralda
@@ -374,7 +388,11 @@ export function RoundPosterModal({ matches, teams }: Props) {
             {/* Vista Previa del Cartel (Aspecto Instagram) */}
             <div className="flex-1 overflow-y-auto p-4">
               <div className="mx-auto max-w-sm rounded-2xl bg-gradient-to-b from-emerald-950 via-slate-900 to-slate-950 p-5 shadow-inner border border-emerald-500/20 text-center">
-                <div className="text-2xl mb-1">⚽</div>
+                <img
+                  src="/logo.png"
+                  alt="Escudo Lodosa"
+                  className="h-12 w-12 mx-auto mb-2 object-contain drop-shadow"
+                />
                 <div className="text-[10px] font-extrabold tracking-widest text-emerald-400 uppercase">
                   Campeonato Fútbol Sala Lodosa
                 </div>
