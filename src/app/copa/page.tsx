@@ -192,11 +192,11 @@ export default async function CopaPage() {
               Fase Final · Eliminatorias
             </h2>
             <p className="text-xs text-slate-500">
-              Cruces oficiales: 1º Grupo A vs 2º Grupo B, y 1º Grupo B vs 2º Grupo A. Los ganadores disputan la Gran Final.
+              Jornada única: Semifinales y Gran Final el mismo día (1º Grupo A vs 2º Grupo B, y 1º Grupo B vs 2º Grupo A).
             </p>
           </div>
           <span className="text-xs font-semibold text-emerald-800 bg-emerald-100 px-2.5 py-1 rounded-full">
-            15 y 22 de mayo de 2027
+            Sábado 15 de mayo de 2027
           </span>
         </div>
 
@@ -229,7 +229,7 @@ export default async function CopaPage() {
                   <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-3">
                     <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 mb-1.5">
                       <span>SEMIFINAL 1</span>
-                      <span className="font-mono text-slate-600">17:00 h</span>
+                      <span className="font-mono text-slate-600">16:30 h</span>
                     </div>
                     <div className="flex items-center justify-between gap-2 font-bold text-slate-800">
                       <span className="truncate">
@@ -246,7 +246,7 @@ export default async function CopaPage() {
                   <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-3">
                     <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 mb-1.5">
                       <span>SEMIFINAL 2</span>
-                      <span className="font-mono text-slate-600">18:30 h</span>
+                      <span className="font-mono text-slate-600">17:45 h</span>
                     </div>
                     <div className="flex items-center justify-between gap-2 font-bold text-slate-800">
                       <span className="truncate">
@@ -267,10 +267,10 @@ export default async function CopaPage() {
               <div className="rounded-2xl border-2 border-emerald-500 bg-gradient-to-br from-white via-emerald-50/40 to-teal-50/60 p-5 shadow-sm">
                 <div className="flex items-center justify-between">
                   <span className="rounded-md bg-emerald-700 px-2.5 py-1 text-xs font-bold text-white">
-                    Sábado 22 de mayo de 2027
+                    Sábado 15 de mayo de 2027
                   </span>
                   <span className="text-xs font-black text-emerald-800 uppercase tracking-wider">
-                    Partido Único
+                    A continuación · 19:30 h
                   </span>
                 </div>
                 <h3 className="mt-3 text-lg font-black text-slate-900">

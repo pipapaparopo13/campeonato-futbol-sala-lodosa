@@ -78,13 +78,7 @@ export const CUP_ROUNDS: { round: number; date: string; title: string; desc: str
   {
     round: 6,
     date: "2027-05-15",
-    title: "Copa · Semifinales",
-    desc: "Cruces de semifinales (tras concluir la Liga).",
-  },
-  {
-    round: 7,
-    date: "2027-05-22",
-    title: "Copa · Gran Final",
-    desc: "Final del torneo de Copa de Lodosa.",
+    title: "Copa · Semifinales y Gran Final",
+    desc: "Semifinales y Gran Final en jornada única (Sábado 15 de mayo de 2027).",
   },
 ];

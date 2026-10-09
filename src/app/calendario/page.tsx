@@ -155,7 +155,7 @@ export default async function CalendarioPage() {
             </p>
           </div>
           <span className="hidden sm:inline text-xs font-medium text-slate-500">
-            Del 17 oct 2026 al 22 may 2027
+            Del 17 oct 2026 al 15 may 2027
           </span>
         </div>
 
