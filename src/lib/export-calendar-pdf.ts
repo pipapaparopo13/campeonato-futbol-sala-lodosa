@@ -64,6 +64,15 @@ export function exportCalendarToPdf({
   }
 
   const sortedKeys = [...roundsMap.keys()].sort((a, b) => {
+    const matchesA = roundsMap.get(a) || [];
+    const matchesB = roundsMap.get(b) || [];
+    const dateA = matchesA[0]?.date || "9999-99-99";
+    const dateB = matchesB[0]?.date || "9999-99-99";
+
+    if (dateA !== dateB) {
+      return dateA.localeCompare(dateB);
+    }
+
     const [compA, roundA] = a.split("-");
     const [compB, roundB] = b.split("-");
     if (compA !== compB) return compA.localeCompare(compB);

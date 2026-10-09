@@ -32,6 +32,71 @@ export default async function CalendarioPage() {
 
   const hasCopaMatches = copaMatches.length > 0;
 
+  // Estructura unificada y ordenada estrictamente por fecha
+  type TimelineItem = {
+    id: string;
+    date: string;
+    type: "liga" | "copa" | "copa-pending" | "descanso";
+    round?: number;
+    title: string;
+    desc?: string;
+    stage?: string;
+    matches?: typeof db.matches;
+  };
+
+  const timelineItems: TimelineItem[] = [];
+
+  // 1. Añadir jornadas de Liga agrupadas por jornada
+  for (const [round, matches] of byRound.entries()) {
+    timelineItems.push({
+      id: `liga-${round}`,
+      date: matches[0]?.date || "",
+      type: "liga",
+      round,
+      title: `Liga · Jornada ${round}`,
+      matches,
+    });
+  }
+
+  // 2. Añadir jornadas de Copa (partidos reales si se han sorteado, o fechas oficiales programadas si no)
+  if (hasCopaMatches) {
+    for (const [round, matches] of copaByRound.entries()) {
+      timelineItems.push({
+        id: `copa-${round}`,
+        date: matches[0]?.date || "",
+        type: "copa",
+        round,
+        title: `Copa · Jornada ${round}`,
+        matches,
+      });
+    }
+  } else {
+    for (const c of CUP_ROUNDS) {
+      timelineItems.push({
+        id: `copa-plan-${c.round}`,
+        date: c.date,
+        type: "copa-pending",
+        round: c.round,
+        title: c.title,
+        desc: c.desc,
+      });
+    }
+  }
+
+  // 3. Añadir sábados de descanso oficial
+  for (const b of TOURNAMENT_BREAKS) {
+    timelineItems.push({
+      id: `break-${b.date}`,
+      date: b.date,
+      type: "descanso",
+      title: b.title,
+      desc: b.desc,
+    });
+  }
+
+  // 4. Ordenar todo estrictamente por fecha cronológica
+  timelineItems.sort((a, b) => (a.date || "9999-99-99").localeCompare(b.date || "9999-99-99"));
+
   return (
     <div className="space-y-8">
       <div>
@@ -78,82 +143,118 @@ export default async function CalendarioPage() {
         </div>
       </div>
 
-      {/* Sección Liga */}
-      <section className="space-y-4">
+      {/* Calendario Cronológico Unificado */}
+      <section className="space-y-6">
         <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-          <h2 className="text-xl font-bold text-slate-900">
-            Liga Regular · 18 Jornadas
-          </h2>
-          <span className="text-xs font-medium text-slate-500">
-            Del 17 de octubre de 2026 al 24 de abril de 2027
+          <div>
+            <h2 className="text-xl font-bold text-slate-900">
+              Cronograma de Competición (Semana a Semana)
+            </h2>
+            <p className="text-xs text-slate-500">
+              Orden cronológico con todas las jornadas de Liga, parones de Copa y descansos oficiales.
+            </p>
+          </div>
+          <span className="hidden sm:inline text-xs font-medium text-slate-500">
+            Del 17 oct 2026 al 22 may 2027
           </span>
         </div>
 
-        {byRound.size === 0 ? (
+        {timelineItems.length === 0 ? (
           <Card>
-            <Empty>El calendario de liga todavía no está publicado.</Empty>
+            <Empty>El calendario todavía no está disponible.</Empty>
           </Card>
         ) : (
           <div className="grid gap-6 md:grid-cols-2">
-            {[...byRound.entries()].map(([round, matches]) => {
-              const dateStr = matches[0]?.date;
-              return (
-                <Card
-                  key={round}
-                  title={
-                    <div className="flex flex-wrap items-baseline justify-between gap-2">
-                      <span className="font-bold text-slate-900">Jornada {round}</span>
-                      {dateStr && (
-                        <span className="text-xs font-semibold text-emerald-700">
-                          {formatDate(dateStr, { long: true })}
+            {timelineItems.map((item) => {
+              // 1. Caso: Descanso oficial
+              if (item.type === "descanso") {
+                return (
+                  <div
+                    key={item.id}
+                    className="flex flex-col justify-between rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50/70 p-5 shadow-2xs md:col-span-2 lg:col-span-1"
+                  >
+                    <div>
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-200 px-2.5 py-0.5 text-[11px] font-black text-slate-700 uppercase tracking-wider">
+                          🛑 Descanso Oficial
                         </span>
-                      )}
+                        {item.date && (
+                          <span className="text-xs font-bold text-slate-500">
+                            {formatDate(item.date, { long: true })}
+                          </span>
+                        )}
+                      </div>
+                      <h3 className="mt-2.5 text-base font-bold text-slate-800">
+                        {item.title}
+                      </h3>
+                      <p className="mt-1 text-xs text-slate-500">{item.desc}</p>
                     </div>
-                  }
-                >
-                  <div className="-mx-3 divide-y divide-slate-100">
-                    {matches.map((m) => (
-                      <MatchRow key={m.id} match={m} teams={teams} />
-                    ))}
+                    <div className="mt-3 text-[11px] font-semibold text-slate-400">
+                      Sin partidos programados en el polideportivo este sábado
+                    </div>
                   </div>
-                </Card>
-              );
-            })}
-          </div>
-        )}
-      </section>
+                );
+              }
 
-      {/* Sección Copa */}
-      <section className="space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-2">
-          <div>
-            <h2 className="text-xl font-bold text-slate-900">
-              Torneo de Copa · 2 Grupos de 5
-            </h2>
-            <p className="text-xs text-slate-500">
-              Intercalada cada 3 jornadas de liga.
-            </p>
-          </div>
-          {!hasCopaMatches && (
-            <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800">
-              Pendiente de sorteo
-            </span>
-          )}
-        </div>
+              // 2. Caso: Copa pendiente de sorteo
+              if (item.type === "copa-pending") {
+                return (
+                  <div
+                    key={item.id}
+                    className="flex flex-col justify-between rounded-2xl border-2 border-amber-300 bg-gradient-to-br from-amber-50/80 to-yellow-50/40 p-5 shadow-xs"
+                  >
+                    <div>
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-200 px-2.5 py-0.5 text-[11px] font-black text-amber-950 uppercase tracking-wider">
+                          🏆 Torneo de Copa
+                        </span>
+                        {item.date && (
+                          <span className="text-xs font-bold text-amber-800">
+                            {formatDate(item.date, { long: true })}
+                          </span>
+                        )}
+                      </div>
+                      <h3 className="mt-2.5 text-base font-extrabold text-amber-950">
+                        {item.title}
+                      </h3>
+                      <p className="mt-1 text-xs text-amber-800/80">{item.desc}</p>
+                    </div>
+                    <div className="mt-4 flex items-center justify-between rounded-xl bg-white/80 px-3 py-2 border border-amber-200 text-xs text-amber-900">
+                      <span className="font-semibold">Partidos de Copa (2 grupos de 5)</span>
+                      <span className="rounded bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-800">
+                        Pendiente de sorteo
+                      </span>
+                    </div>
+                  </div>
+                );
+              }
 
-        {hasCopaMatches ? (
-          <div className="grid gap-6 md:grid-cols-2">
-            {[...copaByRound.entries()].map(([round, matches]) => {
-              const dateStr = matches[0]?.date;
+              // 3. Caso: Jornadas con partidos (Liga o Copa con partidos generados)
+              const matches = item.matches || [];
+              const isCopa = item.type === "copa";
+
               return (
                 <Card
-                  key={round}
+                  key={item.id}
                   title={
                     <div className="flex flex-wrap items-baseline justify-between gap-2">
-                      <span className="font-bold text-slate-900">Copa · Jornada {round}</span>
-                      {dateStr && (
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`rounded px-1.5 py-0.5 text-[10px] font-black uppercase tracking-wider ${
+                            isCopa
+                              ? "bg-amber-100 text-amber-900 border border-amber-300"
+                              : "bg-emerald-100 text-emerald-900 border border-emerald-300"
+                          }`}
+                        >
+                          {isCopa ? "Copa" : "Liga"}
+                        </span>
+                        <span className="font-bold text-slate-900">
+                          {isCopa ? `Copa · Jornada ${item.round}` : `Jornada ${item.round}`}
+                        </span>
+                      </div>
+                      {item.date && (
                         <span className="text-xs font-semibold text-emerald-700">
-                          {formatDate(dateStr, { long: true })}
+                          {formatDate(item.date, { long: true })}
                         </span>
                       )}
                     </div>
@@ -175,46 +276,7 @@ export default async function CalendarioPage() {
               );
             })}
           </div>
-        ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {CUP_ROUNDS.map((c) => (
-              <div
-                key={c.round}
-                className="rounded-2xl border border-dashed border-slate-300 bg-white p-4 shadow-sm"
-              >
-                <div className="text-xs font-bold text-emerald-700">
-                  {formatDate(c.date, { long: true })}
-                </div>
-                <div className="mt-1 font-bold text-slate-800">{c.title}</div>
-                <div className="mt-1 text-xs text-slate-500">{c.desc}</div>
-                <div className="mt-3 inline-block rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-600">
-                  Partidos pendientes del sorteo
-                </div>
-              </div>
-            ))}
-          </div>
         )}
-      </section>
-
-      {/* Parones y descansos oficiales */}
-      <section className="space-y-4">
-        <h2 className="border-b border-slate-200 pb-2 text-xl font-bold text-slate-900">
-          Sábados sin jornada (Descanso oficial)
-        </h2>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {TOURNAMENT_BREAKS.map((b) => (
-            <div
-              key={b.date}
-              className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
-            >
-              <div className="text-xs font-bold text-slate-400">
-                {formatDate(b.date, { long: true })}
-              </div>
-              <div className="mt-1 font-bold text-slate-800">{b.title}</div>
-              <div className="mt-1 text-xs text-slate-500">{b.desc}</div>
-            </div>
-          ))}
-        </div>
       </section>
     </div>
   );
