@@ -217,8 +217,8 @@ export function RoundPosterModal({ matches, teams }: Props) {
       // 4. Pie de cartel oficial
       ctx.textAlign = "center";
       ctx.fillStyle = "#34d399";
-      ctx.font = "bold 22px system-ui, -apple-system, sans-serif";
-      ctx.fillText("campeonato-futbol-sala-lodosa.vercel.app", width / 2, height - 70);
+      ctx.font = "bold 24px system-ui, -apple-system, sans-serif";
+      ctx.fillText("www.lodosafs.com", width / 2, height - 70);
 
       ctx.fillStyle = "#64748b";
       ctx.font = "500 18px system-ui, -apple-system, sans-serif";
@@ -432,8 +432,8 @@ export function RoundPosterModal({ matches, teams }: Props) {
                   })}
                 </div>
 
-                <div className="mt-4 pt-3 border-t border-white/10 text-[10px] text-emerald-300/80 font-mono">
-                  campeonato-futbol-sala-lodosa.vercel.app
+                <div className="mt-4 pt-3 border-t border-white/10 text-[11px] text-emerald-300 font-bold font-mono">
+                  www.lodosafs.com
                 </div>
               </div>
             </div>
