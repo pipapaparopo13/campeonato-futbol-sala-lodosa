@@ -17,7 +17,7 @@ const ARTICLES = [
   "Cuando dos equipos coincidan en el color de las camisetas, cambiará el que figure en segundo lugar (visitante). La organización dispondrá de petos para esta ocasión.",
   "Cuando un equipo se retire de la competición, o es sancionado por el Comité con la retirada, además de perder la fianza, se les descontará a los demás equipos los puntos conseguidos ante este equipo, SALVO LAS CUATRO ÚLTIMAS JORNADAS.",
   "Todas las faltas son directas. Se podrá meter gol directamente desde cualquier punto de la pista, excepto en los saques de puerta o banda, si no es tocada antes por algún jugador. Es válido el gol en saque de esquina directo.",
-  "Cuando un equipo contabilice 4 faltas en el primer y segundo tiempo habrá doble penalti (DISTANCIA: 9 METROS).",
+  "Las faltas son acumulables por tiempo: con la 3ª falta de equipo se avisará y la 4ª falta (y sucesivas) de cada parte se sancionará con doble penalti sin barrera (DISTANCIA: 9 METROS).",
   "El número de jugadores en pista será de 5, incluido el portero.",
   "Las distancias en faltas serán de 5 metros; las de saques de esquina y saques de banda, de 2 metros.",
   "Si hubiera empate entre dos o más equipos al final de la liga, quedaría por delante el que mejor golaveraje tuviera, sacado de las confrontaciones entre ellos. En caso de igualdad: A) Por diferencia de goles general, B) El que más goles tuviera a favor, C) Coeficiente de goles, D) Partido de desempate.",
@@ -36,7 +36,7 @@ const ARTICLES = [
   "Este Comité tiene autoridad para cambiar las normas o imponer otras durante el desarrollo del campeonato.",
   "En el último minuto, se parará el tiempo cada vez que el balón no esté en juego.",
   "Las faltas cometidas por lanzar el balón sobre el techo serán todas SAQUE DE BANDA.",
-  "Si un jugador recibe dos tarjetas amarillas en un mismo partido, será expulsado, pero podrá entrar otro jugador en su lugar inmediatamente. Si la expulsión fuera con tarjeta roja directa, no podrá sustituirlo ningún otro jugador durante 5 minutos; transcurrido este periodo podrá entrar en pista otro jugador.",
+  "Si un jugador recibe dos tarjetas amarillas en un mismo partido, será expulsado, pero podrá entrar otro jugador en su lugar inmediatamente. Si un jugador es expulsado con tarjeta roja (directa), el equipo se quedará con un jugador menos durante 3 minutos o hasta que el equipo contrario marque un gol (momento en el cual podrá entrar un sustituto).",
   "Se podrán cambiar jugadores de la plantilla solamente en las DOS PRIMERAS JORNADAS y en la PRIMERA de la Segunda Vuelta.",
   "Si un jugador sancionado juega un partido (alineación indebida), se le dará el partido por perdido (2 - 0), se comunicará al equipo contrario que ha ganado el encuentro y no se arbitrará el partido.",
   "El equipo que no se presente a la hora señalada para jugar, se le dará el partido por perdido la 1ª vez (2 - 0). Si no se presentara por segunda vez en el mismo campeonato, automáticamente se le excluirá de la competición. El equipo que se retire o se le excluya del campeonato no podrá participar en la temporada siguiente.",
@@ -75,8 +75,8 @@ export default async function ReglamentoPage() {
           </div>
           <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
             <span className="text-2xl">⚠️</span>
-            <div className="mt-2 text-sm font-bold text-slate-900">Doble Penalti a la 4ª falta</div>
-            <div className="text-xs text-slate-500">Lanzamiento directo a 9 metros.</div>
+            <div className="mt-2 text-sm font-bold text-slate-900">Aviso a la 3ª · Doble Penalti a la 4ª</div>
+            <div className="text-xs text-slate-500">Acumulables por tiempo. Sin barrera (9 m).</div>
           </div>
           <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
             <span className="text-2xl">🟨</span>
@@ -180,6 +180,7 @@ export default async function ReglamentoPage() {
               <div className="rounded-lg bg-white/80 p-2.5">
                 <div className="font-bold text-slate-900">Tarjeta Roja Directa</div>
                 <div className="text-red-700 font-semibold">1 partido mínimo</div>
+                <div className="text-[11px] text-slate-600 mt-0.5">3 min con uno menos o hasta encajar gol</div>
               </div>
               <div className="rounded-lg bg-white/80 p-2.5">
                 <div className="font-bold text-slate-900">3 Tarjetas Amarillas (1er ciclo)</div>

@@ -139,10 +139,10 @@ export function exportReglamentoToPdf({
 
   // Nota de tarjetas
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(7.2);
+  doc.setFontSize(6.8);
   doc.setTextColor(146, 64, 14);
   doc.text(
-    "RÉGIMEN DE TARJETAS: 3 Amarillas = 1 partido de sanción. Tarjeta Roja directa = mínimo 1 partido. Las tarjetas computan entre Liga y Copa.",
+    "TARJETAS Y FALTAS: 3ª falta aviso / 4ª doble penalti. Roja: 3 min con uno menos o gol rival. 3 Amarillas = 1 partido sanción.",
     marginX + 4,
     currentY + 54
   );
