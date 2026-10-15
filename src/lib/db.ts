@@ -132,11 +132,13 @@ async function readRaw(): Promise<DB> {
     if (kv) {
       const remote = await readKv(kv.url, kv.token);
       if (remote && remote.teams && remote.teams.length > 0) {
+        const official = initialData as DB;
+        let needsSync = false;
+
         // Si la base de datos remota aún tiene los nombres por defecto "Equipo 1",
         // sincronizar automáticamente con los nombres oficiales y plantillas de initialData
         const hasGenericNames = remote.teams.some((t) => /^Equipo \d+$/.test(t.name));
         if (hasGenericNames) {
-          const official = initialData as DB;
           // Actualizar nombres y colores
           for (let i = 0; i < remote.teams.length; i++) {
             if (official.teams[i]) {
@@ -149,6 +151,37 @@ async function readRaw(): Promise<DB> {
           if (!remote.players || remote.players.length === 0) {
             remote.players = official.players;
           }
+          needsSync = true;
+        }
+
+        // Sincronizar altas y bajas oficiales de jugadores en KV si difieren
+        // 1. Eliminar Hachimi si todavía está en KV (salvo que tenga eventos)
+        const hasHachimi = remote.players?.some((p) => p.name.toLowerCase().includes("hachimi"));
+        if (hasHachimi) {
+          const playedPlayerIds = new Set(
+            (remote.matches || []).flatMap((m) => m.events || []).map((e) => e.playerId)
+          );
+          remote.players = (remote.players || []).filter(
+            (p) => !p.name.toLowerCase().includes("hachimi") || playedPlayerIds.has(p.id)
+          );
+          needsSync = true;
+        }
+
+        // 2. Incorporar nuevos jugadores oficiales si no existen aún en KV
+        for (const officialPlayer of official.players) {
+          const exists = remote.players?.some(
+            (p) =>
+              p.id === officialPlayer.id ||
+              (p.name.toLowerCase() === officialPlayer.name.toLowerCase() && p.teamId === officialPlayer.teamId)
+          );
+          if (!exists) {
+            if (!remote.players) remote.players = [];
+            remote.players.push(officialPlayer);
+            needsSync = true;
+          }
+        }
+
+        if (needsSync) {
           await writeKv(kv.url, kv.token, remote);
         }
         return remote;

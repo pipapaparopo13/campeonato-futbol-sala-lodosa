@@ -877,6 +877,13 @@
       "position": ""
     },
     {
+      "id": "0492065c55df",
+      "teamId": "3cfaaa6f0593",
+      "name": "Abdelilah El Ouardi",
+      "number": 15,
+      "position": ""
+    },
+    {
       "id": "b8fc5df84461",
       "teamId": "4e58cd19c12f",
       "name": "Javier Marín Gurrea",
@@ -891,9 +898,9 @@
       "position": ""
     },
     {
-      "id": "de8c584617dc",
+      "id": "86877502497a",
       "teamId": "4e58cd19c12f",
-      "name": "Hampa Hachimi",
+      "name": "Aníbal Palomino Girio",
       "number": 3,
       "position": ""
     },
@@ -951,6 +958,20 @@
       "teamId": "4e58cd19c12f",
       "name": "Leonardo Guzmán",
       "number": 11,
+      "position": ""
+    },
+    {
+      "id": "fa382b997365",
+      "teamId": "4e58cd19c12f",
+      "name": "Javier Merino Aragón",
+      "number": 12,
+      "position": ""
+    },
+    {
+      "id": "1d89a7ddbba1",
+      "teamId": "4e58cd19c12f",
+      "name": "Jose Zambrano",
+      "number": 13,
       "position": ""
     },
     {
