@@ -12,6 +12,7 @@ import {
 import { analyzeActaImage, type ExtractedActa } from "@/lib/ai-acta";
 import { getDB, mutate, newId } from "@/lib/db";
 import { roundRobin } from "@/lib/stats";
+import { saveActaPhotoStorage, deleteActaPhotoStorage } from "@/lib/acta-storage";
 import type { EventType, MatchStatus } from "@/lib/types";
 
 // ---------- utilidades ----------
@@ -72,9 +73,20 @@ export async function updateSettings(fd: FormData) {
       season: str(fd, "season", 40),
       location: str(fd, "location"),
       defaultVenue: str(fd, "defaultVenue"),
+      refereeFee: intOrNull(fd, "refereeFee") ?? db.settings.refereeFee ?? 20,
     };
   });
   done("/admin/ajustes", "Ajustes guardados.");
+}
+
+export async function updateRefereeFee(fd: FormData) {
+  await requireAdmin();
+  const fee = intOrNull(fd, "refereeFee") ?? 20;
+  const back = str(fd, "redirectTo") || "/admin/arbitros";
+  await mutate((db) => {
+    db.settings.refereeFee = fee;
+  });
+  done(back, `Tarifa de arbitraje actualizada a ${fee}€ por partido.`);
 }
 
 // ---------- equipos ----------
@@ -531,6 +543,17 @@ export async function extractActaData(fd: FormData): Promise<
   const buffer = Buffer.from(bytes);
   const base64Data = buffer.toString("base64");
   const mimeType = file.type || "image/jpeg";
+  const dataUrl = `data:${mimeType};base64,${base64Data}`;
+
+  // Guardar la fotografía física del acta de forma segura (solo visible para admin)
+  await saveActaPhotoStorage(matchId, dataUrl);
+  await mutate((db) => {
+    const m = db.matches.find((x) => x.id === matchId);
+    if (m) {
+      m.hasActaPhoto = true;
+      m.actaPhotoUploadedAt = new Date().toISOString();
+    }
+  });
 
   const db = await getDB();
   const match = db.matches.find((m) => m.id === matchId);
@@ -617,6 +640,10 @@ export async function scanActaPhoto(fd: FormData) {
   const buffer = Buffer.from(bytes);
   const base64Data = buffer.toString("base64");
   const mimeType = file.type || "image/jpeg";
+  const dataUrl = `data:${mimeType};base64,${base64Data}`;
+
+  // Guardar la foto del acta original de forma segura
+  await saveActaPhotoStorage(matchId, dataUrl);
 
   const err = await mutate(async (db) => {
     const match = db.matches.find((m) => m.id === matchId);
@@ -639,6 +666,8 @@ export async function scanActaPhoto(fd: FormData) {
     });
 
     match.status = "played";
+    match.hasActaPhoto = true;
+    match.actaPhotoUploadedAt = new Date().toISOString();
     if (extracted.homeScore !== null) match.homeScore = extracted.homeScore;
     if (extracted.awayScore !== null) match.awayScore = extracted.awayScore;
     if (extracted.referee) match.referee = extracted.referee;
@@ -666,6 +695,53 @@ export async function scanActaPhoto(fd: FormData) {
     back,
     "¡Acta analizada con IA! Marcador, goleadores, minutos y tarjetas rellenados automáticamente.",
   );
+}
+
+export async function uploadActaPhotoOnly(fd: FormData) {
+  await requireAdmin();
+  const matchId = str(fd, "matchId");
+  const back = str(fd, "redirectTo") || `/admin/partidos/${matchId}`;
+  const file = fd.get("photo") as File | null;
+
+  if (!file || file.size === 0) {
+    fail(back, "Por favor, selecciona o haz una fotografía del acta.");
+  }
+
+  const bytes = await file.arrayBuffer();
+  const buffer = Buffer.from(bytes);
+  const base64Data = buffer.toString("base64");
+  const mimeType = file.type || "image/jpeg";
+  const dataUrl = `data:${mimeType};base64,${base64Data}`;
+
+  await saveActaPhotoStorage(matchId, dataUrl);
+
+  await mutate((db) => {
+    const match = db.matches.find((m) => m.id === matchId);
+    if (match) {
+      match.hasActaPhoto = true;
+      match.actaPhotoUploadedAt = new Date().toISOString();
+    }
+  });
+
+  done(back, "Fotografía física del acta guardada correctamente.");
+}
+
+export async function deleteActaPhotoAction(fd: FormData) {
+  await requireAdmin();
+  const matchId = str(fd, "matchId");
+  const back = str(fd, "redirectTo") || `/admin/partidos/${matchId}`;
+
+  await deleteActaPhotoStorage(matchId);
+
+  await mutate((db) => {
+    const match = db.matches.find((m) => m.id === matchId);
+    if (match) {
+      match.hasActaPhoto = false;
+      match.actaPhotoUploadedAt = undefined;
+    }
+  });
+
+  done(back, "Fotografía del acta eliminada.");
 }
 
 export async function voteMvp(fd: FormData) {

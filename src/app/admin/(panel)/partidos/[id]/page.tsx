@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { addEvent, deleteEvent, deleteMatch, updateMatch } from "@/app/actions";
+import { addEvent, deleteActaPhotoAction, deleteEvent, deleteMatch, updateMatch } from "@/app/actions";
 import { getDB } from "@/lib/db";
 import { computeSanctions, eventSide, playerMap, sortEvents, teamMap } from "@/lib/stats";
 import { EVENT_LABELS, STATUS_LABELS } from "@/lib/types";
@@ -20,7 +20,8 @@ export default async function AdminPartido({
   params: Promise<{ id: string }>;
   searchParams: Promise<{ error?: string; ok?: string }>;
 }) {
-  await requireEditorOrReferee();
+  const session = await requireEditorOrReferee();
+  const isAdmin = session.role === "admin";
   const [{ id }, sp, db] = await Promise.all([params, searchParams, getDB()]);
   const match = db.matches.find((m) => m.id === id);
   if (!match) notFound();
@@ -70,6 +71,62 @@ export default async function AdminPartido({
           redirectTo={`/admin/partidos/${match.id}`}
         />
         <AiActaScanner matchId={match.id} />
+
+        {isAdmin && match.hasActaPhoto && (
+          <Card title="📷 Fotografía del acta física (Exclusivo Administrador)">
+            <div className="flex flex-col sm:flex-row items-center gap-5">
+              <a
+                href={`/api/actas/${match.id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group relative block w-full sm:w-64 overflow-hidden rounded-xl border border-slate-200 bg-slate-900 text-center shadow-xs"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={`/api/actas/${match.id}`}
+                  alt="Fotografía física del acta"
+                  className="h-44 w-full object-cover transition group-hover:scale-105"
+                />
+                <span className="absolute inset-0 flex items-center justify-center bg-black/40 text-xs font-bold text-white opacity-0 transition group-hover:opacity-100">
+                  🔍 Ver en tamaño completo
+                </span>
+              </a>
+              <div className="flex-1 space-y-2 text-xs">
+                <p className="font-bold text-slate-800">
+                  Esta es la fotografía original del acta en papel registrada para este encuentro.
+                </p>
+                {match.actaPhotoUploadedAt && (
+                  <p className="text-slate-500">
+                    Fecha de subida: {new Date(match.actaPhotoUploadedAt).toLocaleString()}
+                  </p>
+                )}
+                <div className="flex flex-wrap items-center gap-2 pt-2">
+                  <a
+                    href={`/api/actas/${match.id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn-secondary py-1.5 text-xs font-bold"
+                  >
+                    Abrir foto completa
+                  </a>
+                  <Link href="/admin/actas" className="btn-secondary py-1.5 text-xs font-bold">
+                    Ir al archivo de actas
+                  </Link>
+                  <form action={deleteActaPhotoAction}>
+                    <input type="hidden" name="matchId" value={match.id} />
+                    <input type="hidden" name="redirectTo" value={`/admin/partidos/${match.id}`} />
+                    <button
+                      type="submit"
+                      className="rounded-xl px-3 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50"
+                    >
+                      Eliminar foto
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </Card>
+        )}
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">

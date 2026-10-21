@@ -43,6 +43,8 @@ export interface Match {
   mvpVotes?: Record<string, number>; // playerId -> numero de votos
   finishedAt?: string; // ISO string de cuando finalizó
   manualMvpPlayerId?: string; // Opcional por si el admin fija uno
+  hasActaPhoto?: boolean; // Si se ha subido fotografía física del acta en papel
+  actaPhotoUploadedAt?: string; // Fecha y hora de subida de la foto
 }
 
 export interface Settings {
@@ -50,6 +52,7 @@ export interface Settings {
   season: string;
   location: string;
   defaultVenue: string;
+  refereeFee?: number; // Tarifa en euros por partido arbitrado (ej. 20€)
 }
 
 export interface DB {

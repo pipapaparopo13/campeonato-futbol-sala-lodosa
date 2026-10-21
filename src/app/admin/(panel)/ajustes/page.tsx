@@ -34,9 +34,23 @@ export default async function AdminAjustes({
               <input id="location" name="location" defaultValue={settings.location} className="input" />
             </div>
           </div>
-          <div>
-            <label className="label" htmlFor="defaultVenue">Pabellón por defecto</label>
-            <input id="defaultVenue" name="defaultVenue" defaultValue={settings.defaultVenue} className="input" />
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="label" htmlFor="defaultVenue">Pabellón por defecto</label>
+              <input id="defaultVenue" name="defaultVenue" defaultValue={settings.defaultVenue} className="input" />
+            </div>
+            <div>
+              <label className="label" htmlFor="refereeFee">Tarifa árbitro (€ / partido)</label>
+              <input
+                id="refereeFee"
+                name="refereeFee"
+                type="number"
+                min="0"
+                step="1"
+                defaultValue={settings.refereeFee ?? 20}
+                className="input"
+              />
+            </div>
           </div>
           <button className="btn">Guardar</button>
         </form>
