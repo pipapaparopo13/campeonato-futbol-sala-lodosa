@@ -31,7 +31,14 @@ export default async function AdminHome({
     );
   }
 
-  const pending = sortMatches(db.matches).filter((m) => !isPlayed(m)).slice(0, 8);
+  const scheduledOrLive = sortMatches(db.matches).filter(
+    (m) => m.status === "scheduled" || m.status === "in_progress",
+  );
+  const pending = (
+    scheduledOrLive.length > 0
+      ? scheduledOrLive
+      : sortMatches(db.matches).filter((m) => !isPlayed(m))
+  ).slice(0, 8);
   const played = db.matches.filter(isPlayed).length;
 
   return (

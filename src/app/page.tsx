@@ -16,18 +16,26 @@ export default async function Home() {
   const sorted = sortMatches(db.matches);
   const results = sorted.filter(isPlayed).reverse().slice(0, 5);
 
-  // Obtener los partidos pendientes
-  const pendingMatches = sorted.filter((m) => !isPlayed(m));
-  // Buscar la siguiente jornada por disputarse
-  const nextRoundNumber = pendingMatches[0]?.round;
-  const nextRoundComp = pendingMatches[0]?.competition ?? "liga";
+  // Buscar el próximo partido programado o en juego para determinar la siguiente jornada activa
+  const nextScheduledMatch = sorted.find(
+    (m) => m.status === "scheduled" || m.status === "in_progress",
+  );
+  // Si no hay programados (ej. fin de temporada o solo aplazados), tomar el primer no jugado
+  const fallbackMatch = sorted.find((m) => !isPlayed(m));
+  const activeMatch = nextScheduledMatch ?? fallbackMatch;
 
-  // Mostrar exactamente los 5 partidos de la siguiente jornada
+  const nextRoundNumber = activeMatch?.round;
+  const nextRoundComp = activeMatch?.competition ?? "liga";
+
+  // Mostrar todos los partidos de esa jornada (jugados con su resultado y programados con su hora)
   const upcoming = nextRoundNumber
-    ? pendingMatches.filter(
+    ? sorted.filter(
         (m) => (m.competition ?? "liga") === nextRoundComp && m.round === nextRoundNumber,
       )
     : [];
+
+  // Partidos aplazados pendientes de fecha
+  const postponedMatches = sorted.filter((m) => m.status === "postponed");
 
   const scorers = computePlayerStats(db)
     .filter((s) => s.goals > 0)
@@ -58,7 +66,7 @@ export default async function Home() {
         <Card
           title={
             nextRoundNumber
-              ? `Siguiente jornada (Jornada ${nextRoundNumber})`
+              ? `Siguiente jornada (${nextRoundComp === "copa" ? "Copa" : "Liga"} · Jornada ${nextRoundNumber})`
               : "Próximos partidos"
           }
         >
@@ -72,6 +80,26 @@ export default async function Home() {
             <Empty>No hay partidos programados.</Empty>
           )}
         </Card>
+
+        {postponedMatches.length > 0 && (
+          <div className="rounded-2xl border border-amber-200 bg-amber-50/80 p-3.5 text-xs text-amber-900 shadow-xs flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <span className="text-base">⏸️</span>
+              <div>
+                <span className="font-bold">
+                  {postponedMatches.length} {postponedMatches.length === 1 ? "partido aplazado" : "partidos aplazados"}
+                </span>{" "}
+                pendiente{postponedMatches.length > 1 ? "s" : ""} de disputar.
+              </div>
+            </div>
+            <Link
+              href="/calendario"
+              className="shrink-0 rounded-lg bg-white px-2.5 py-1 text-[11px] font-bold text-amber-900 ring-1 ring-amber-300 hover:bg-amber-100/50"
+            >
+              Ver calendario →
+            </Link>
+          </div>
+        )}
       </div>
       <div className="space-y-6">
         <Card

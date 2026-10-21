@@ -43,9 +43,13 @@ export function MesaScanner({ matches, teams, players }: Props) {
     return list;
   }, [matches]);
 
-  // Jornada con partidos pendientes por defecto
+  // Jornada con partidos pendientes por defecto (priorizar programados o en juego)
   const defaultRoundKey = useMemo(() => {
-    const pending = matches.find((m) => m.status !== "played");
+    const scheduled = matches.find((m) => m.status === "scheduled" || m.status === "in_progress");
+    if (scheduled) {
+      return `${scheduled.competition ?? "liga"}-${scheduled.round}`;
+    }
+    const pending = matches.find((m) => m.status !== "played" && m.status !== "no_show");
     if (pending) {
       return `${pending.competition ?? "liga"}-${pending.round}`;
     }

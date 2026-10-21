@@ -34,14 +34,14 @@ export function RoundPosterModal({ matches, teams }: Props) {
     let nextUpcoming = 1;
 
     for (const m of liga) {
-      if (m.status === "played" && m.round > lastPlayed) {
+      if ((m.status === "played" || m.status === "no_show") && m.round > lastPlayed) {
         lastPlayed = m.round;
       }
     }
 
-    const firstPending = liga.find((m) => m.status !== "played");
-    if (firstPending) {
-      nextUpcoming = firstPending.round;
+    const firstScheduled = liga.find((m) => m.status === "scheduled" || m.status === "in_progress");
+    if (firstScheduled) {
+      nextUpcoming = firstScheduled.round;
     } else {
       nextUpcoming = lastPlayed;
     }
