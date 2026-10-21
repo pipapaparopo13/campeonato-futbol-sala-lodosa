@@ -154,9 +154,27 @@ export default async function AdminPartido({
               <input id="awayScore" name="awayScore" type="number" min={0} defaultValue={match.awayScore ?? ""} className="input text-center text-lg font-bold" />
             </div>
             <div>
-              <label className="label" htmlFor="status">Estado</label>
-              <select id="status" name="status" defaultValue={match.status} className="input">
-                {Object.entries(STATUS_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+              <label className="label" htmlFor="status">Estado del Partido</label>
+              <select id="status" name="status" defaultValue={match.status} className="input font-semibold">
+                {Object.entries(STATUS_LABELS).map(([k, v]) => (
+                  <option key={k} value={k}>
+                    {v}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="label" htmlFor="noShow">Incomparecencia / No presentado</label>
+              <select
+                id="noShow"
+                name="noShow"
+                defaultValue={match.noShow || "none"}
+                className="input font-semibold text-rose-800"
+              >
+                <option value="none">Ninguno (Partido disputado)</option>
+                <option value="home">❌ Local No Presentado ({home?.name || "Local"} · -3 pts)</option>
+                <option value="away">❌ Visitante No Presentado ({away?.name || "Visitante"} · -3 pts)</option>
+                <option value="both">❌ Ambos No Presentados (-3 pts a ambos)</option>
               </select>
             </div>
             <div>

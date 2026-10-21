@@ -75,14 +75,20 @@ export default async function ActaPage({ params }: Props) {
             className={
               inProgress
                 ? "inline-flex items-center gap-1 rounded-full bg-rose-600 px-2 py-0.5 text-white font-black animate-pulse"
-                : played
-                  ? "text-emerald-400"
-                  : match.status === "postponed"
-                    ? "text-amber-400"
-                    : ""
+                : match.noShow
+                  ? "inline-flex items-center gap-1 rounded-full bg-rose-600 px-2 py-0.5 text-white font-bold"
+                  : played
+                    ? "text-emerald-400 font-bold"
+                    : match.status === "postponed"
+                      ? "inline-flex items-center gap-1 rounded-full bg-amber-400 text-slate-950 font-black px-2 py-0.5"
+                      : ""
             }
           >
-            {inProgress ? "🔴 EN DIRECTO" : STATUS_LABELS[match.status]}
+            {inProgress
+              ? "🔴 EN DIRECTO"
+              : match.noShow
+                ? `❌ NO PRESENTADO (${match.noShow === "home" ? home?.name || "Local" : match.noShow === "away" ? away?.name || "Visitante" : "Ambos"} · -3 PTS)`
+                : STATUS_LABELS[match.status]}
           </span>
         </div>
         <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 sm:gap-4 px-3 sm:px-4 py-5 sm:py-8">
@@ -126,6 +132,28 @@ export default async function ActaPage({ params }: Props) {
           ))}
         </dl>
       </section>
+
+      {match.noShow && (
+        <div className="rounded-2xl border border-rose-300 bg-rose-50 p-4 text-xs font-semibold text-rose-900 shadow-xs flex items-center gap-2.5">
+          <span className="text-xl">❌</span>
+          <div>
+            <strong>Resolución de Competición:</strong> El equipo{" "}
+            <span className="font-bold underline">
+              {match.noShow === "home" ? home?.name || "Local" : match.noShow === "away" ? away?.name || "Visitante" : "Ambos equipos"}
+            </span>{" "}
+            no compareció al partido (No Presentado). Se le da el encuentro por perdido y se le restan <strong>3 puntos de sanción</strong> en la tabla clasificatoria.
+          </div>
+        </div>
+      )}
+
+      {match.status === "postponed" && (
+        <div className="rounded-2xl border border-amber-300 bg-amber-50 p-4 text-xs font-semibold text-amber-900 shadow-xs flex items-center gap-2.5">
+          <span className="text-xl">⏸</span>
+          <div>
+            <strong>Partido Aplazado:</strong> Este encuentro se disputará en una nueva fecha acordada entre los clubes y la organización del campeonato.
+          </div>
+        </div>
+      )}
 
       {/* Votación y distintivo MVP del Partido */}
       <MatchMvpSection

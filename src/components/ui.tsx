@@ -128,7 +128,7 @@ export function MatchRow({
         <TeamBadge team={home} size="sm" />
       </div>
       <div className="flex min-w-[70px] sm:min-w-[88px] flex-col items-center">
-        {played || inProgress ? (
+        {played || inProgress || match.status === "no_show" ? (
           <div className="flex flex-col items-center">
             {inProgress && (
               <span className="mb-0.5 inline-flex items-center gap-1 rounded-full bg-rose-600 px-1.5 py-0.2 text-[9px] font-black uppercase text-white animate-pulse">
@@ -136,9 +136,14 @@ export function MatchRow({
                 EN VIVO
               </span>
             )}
+            {match.noShow && (
+              <span className="mb-0.5 inline-flex items-center gap-1 rounded-full bg-rose-100 px-1.5 py-0.2 text-[9px] font-black uppercase text-rose-700 border border-rose-300">
+                NO PRESENTADO
+              </span>
+            )}
             <span
               className={`rounded-lg px-2 sm:px-3 py-0.5 sm:py-1 font-mono text-base sm:text-lg font-bold text-white shadow-xs ${
-                inProgress ? "bg-rose-600 ring-2 ring-rose-400" : "bg-slate-900"
+                inProgress ? "bg-rose-600 ring-2 ring-rose-400" : match.noShow ? "bg-rose-900" : "bg-slate-900"
               }`}
             >
               {match.homeScore ?? 0} - {match.awayScore ?? 0}
@@ -146,10 +151,14 @@ export function MatchRow({
           </div>
         ) : (
           <span
-            className={`rounded-lg px-2 sm:px-3 py-0.5 sm:py-1 text-[11px] sm:text-xs font-semibold ${match.status === "postponed" ? "bg-amber-100 text-amber-800" : "bg-slate-100 text-slate-600"}`}
+            className={`rounded-lg px-2 sm:px-3 py-0.5 sm:py-1 text-[11px] sm:text-xs font-semibold ${
+              match.status === "postponed"
+                ? "bg-amber-100 text-amber-900 border border-amber-300 font-bold"
+                : "bg-slate-100 text-slate-600"
+            }`}
           >
             {match.status === "postponed"
-              ? STATUS_LABELS.postponed
+              ? "⏸ APLAZADO"
               : match.time || "vs"}
           </span>
         )}
@@ -181,6 +190,8 @@ export function StandingsTable({
   rows: StandingRow[];
   compact?: boolean;
 }) {
+  const hasPenalties = rows.some((r) => (r.penaltyPoints ?? 0) > 0);
+
   return (
     <div className="-mx-3.5 sm:-mx-5 overflow-x-auto">
       <table className="w-full min-w-[340px] text-xs sm:text-sm">
@@ -206,6 +217,7 @@ export function StandingsTable({
         <tbody>
           {rows.map((r, i) => {
             const dg = r.goalsFor - r.goalsAgainst;
+            const hasPenalty = (r.penaltyPoints ?? 0) > 0;
             return (
               <tr key={r.team.id} className="border-t border-slate-100 hover:bg-slate-50/70">
                 <td className="py-2 sm:py-2.5 pl-3 sm:pl-5 font-bold text-slate-400">{i + 1}</td>
@@ -232,7 +244,17 @@ export function StandingsTable({
                   {dg > 0 ? `+${dg}` : dg}
                 </td>
                 <td className="py-2 sm:py-2.5 pr-3 sm:pr-5 text-center text-sm sm:text-base font-extrabold text-emerald-700">
-                  {r.points}
+                  <div className="inline-flex items-center justify-center gap-1">
+                    <span>{r.points}</span>
+                    {hasPenalty && (
+                      <span
+                        title={`Sanción: -${r.penaltyPoints} puntos por incomparecencia (no presentado)`}
+                        className="cursor-help rounded bg-rose-100 px-1 py-0.2 text-[9px] font-black text-rose-700 border border-rose-300"
+                      >
+                        -{r.penaltyPoints}
+                      </span>
+                    )}
+                  </div>
                 </td>
                 {!compact && (
                   <td className="hidden py-2.5 pr-5 md:table-cell">
@@ -253,6 +275,15 @@ export function StandingsTable({
           })}
         </tbody>
       </table>
+
+      {hasPenalties && (
+        <div className="mt-3 mx-3 sm:mx-5 rounded-xl border border-rose-200 bg-rose-50/80 p-2.5 text-[11px] text-rose-800 flex items-center gap-2">
+          <span>⚠️</span>
+          <span>
+            <strong>Sanción disciplinaria:</strong> Los equipos con la etiqueta roja tienen deducidos 3 puntos en la clasificación por incomparecencia (no presentado).
+          </span>
+        </div>
+      )}
     </div>
   );
 }

@@ -58,6 +58,35 @@ export function LiveControlPanel({ match, home, away, players, redirectTo }: Pro
     });
   }
 
+  function handleSetPostponed() {
+    if (!confirm("¿Marcar este encuentro como APLAZADO?")) return;
+    const fd = new FormData();
+    fd.append("matchId", match.id);
+    fd.append("actionType", "set_postponed");
+    if (redirectTo) fd.append("redirectTo", redirectTo);
+    startTransition(() => {
+      quickLiveUpdate(fd);
+    });
+  }
+
+  function handleSetNoShow(side: "home" | "away" | "both") {
+    const teamName = side === "home" ? home?.name : side === "away" ? away?.name : "Ambos equipos";
+    if (
+      !confirm(
+        `¿Declarar NO PRESENTADO a ${teamName}?\n\nSe registrará la incomparecencia y se le restarán 3 puntos de sanción en la clasificación.`
+      )
+    )
+      return;
+    const fd = new FormData();
+    fd.append("matchId", match.id);
+    fd.append("actionType", "set_no_show");
+    fd.append("noShowSide", side);
+    if (redirectTo) fd.append("redirectTo", redirectTo);
+    startTransition(() => {
+      quickLiveUpdate(fd);
+    });
+  }
+
   function openAddGoal(side: "home" | "away") {
     setSelectedSide(side);
     setSelectedEventType("goal");
@@ -133,7 +162,7 @@ export function LiveControlPanel({ match, home, away, players, redirectTo }: Pro
         </div>
 
         {/* Botones de estado: Iniciar directo, Pausar o Finalizar */}
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {!inProgress ? (
             <button
               onClick={() => handleSetStatus("in_progress")}
@@ -162,6 +191,37 @@ export function LiveControlPanel({ match, home, away, players, redirectTo }: Pro
               </button>
             </>
           )}
+
+          {/* Botón Aplazar */}
+          <button
+            type="button"
+            onClick={handleSetPostponed}
+            disabled={isPending}
+            className="inline-flex cursor-pointer items-center gap-1 rounded-xl border border-amber-300 bg-amber-50 px-2.5 py-2 text-xs font-bold text-amber-900 transition hover:bg-amber-100 disabled:opacity-50"
+            title="Marcar partido como aplazado"
+          >
+            <span>⏸</span>
+            <span>Aplazar</span>
+          </button>
+
+          {/* Botón No Presentado */}
+          <button
+            type="button"
+            onClick={() => {
+              const choice = prompt(
+                `Indica quién no se ha presentado:\n1: Local (${home?.name || "Local"})\n2: Visitante (${away?.name || "Visitante"})\n3: Ambos\n\nEscribe 1, 2 o 3:`
+              );
+              if (choice === "1") handleSetNoShow("home");
+              else if (choice === "2") handleSetNoShow("away");
+              else if (choice === "3") handleSetNoShow("both");
+            }}
+            disabled={isPending}
+            className="inline-flex cursor-pointer items-center gap-1 rounded-xl border border-rose-300 bg-rose-50 px-2.5 py-2 text-xs font-bold text-rose-900 transition hover:bg-rose-100 disabled:opacity-50"
+            title="Declarar incomparecencia / no presentado (-3 pts)"
+          >
+            <span>❌</span>
+            <span>No presentado</span>
+          </button>
         </div>
       </div>
 

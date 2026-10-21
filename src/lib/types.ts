@@ -1,6 +1,8 @@
 export type EventType = "goal" | "own_goal" | "yellow" | "red";
 
-export type MatchStatus = "scheduled" | "in_progress" | "played" | "postponed";
+export type MatchStatus = "scheduled" | "in_progress" | "played" | "postponed" | "no_show";
+
+export type NoShowType = "home" | "away" | "both";
 
 export interface Team {
   id: string;
@@ -45,6 +47,7 @@ export interface Match {
   manualMvpPlayerId?: string; // Opcional por si el admin fija uno
   hasActaPhoto?: boolean; // Si se ha subido fotografía física del acta en papel
   actaPhotoUploadedAt?: string; // Fecha y hora de subida de la foto
+  noShow?: NoShowType; // Incomparecencia: local, visitante o ambos (conlleva -3 pts)
 }
 
 export interface Settings {
@@ -73,5 +76,6 @@ export const STATUS_LABELS: Record<MatchStatus, string> = {
   scheduled: "Pendiente",
   in_progress: "🔴 EN DIRECTO",
   played: "Finalizado",
-  postponed: "Aplazado",
+  postponed: "⏸ Aplazado",
+  no_show: "❌ No presentado",
 };

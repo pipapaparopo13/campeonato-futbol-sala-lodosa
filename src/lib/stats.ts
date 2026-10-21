@@ -9,11 +9,13 @@ export interface StandingRow {
   goalsFor: number;
   goalsAgainst: number;
   points: number;
+  penaltyPoints?: number; // Puntos restados por sanciones (ej. -3 por no presentado)
+  noShowCount?: number; // Partidos que no se ha presentado
   form: ("W" | "D" | "L")[];
 }
 
 export function isPlayed(m: Match) {
-  return m.status === "played" && m.homeScore !== null && m.awayScore !== null;
+  return (m.status === "played" || m.status === "no_show") && m.homeScore !== null && m.awayScore !== null;
 }
 
 export function sortMatches(matches: Match[]) {
@@ -85,25 +87,61 @@ export function computeStandings(
     home.goalsAgainst += as;
     away.goalsFor += as;
     away.goalsAgainst += hs;
-    if (hs > as) {
-      home.won++;
-      away.lost++;
-      home.points += 3;
-      home.form.push("W");
-      away.form.push("L");
-    } else if (hs < as) {
+    // Comprobar si hubo incomparecencia / no presentado
+    if (m.noShow === "home") {
+      // Local NO presentado: victoria para visitante (+3 pts), derrota para local y penalización de -3 pts
       away.won++;
       home.lost++;
       away.points += 3;
-      home.form.push("L");
+      home.points -= 3;
+      home.penaltyPoints = (home.penaltyPoints || 0) + 3;
+      home.noShowCount = (home.noShowCount || 0) + 1;
       away.form.push("W");
+      home.form.push("L");
+    } else if (m.noShow === "away") {
+      // Visitante NO presentado: victoria para local (+3 pts), derrota para visitante y penalización de -3 pts
+      home.won++;
+      away.lost++;
+      home.points += 3;
+      away.points -= 3;
+      away.penaltyPoints = (away.penaltyPoints || 0) + 3;
+      away.noShowCount = (away.noShowCount || 0) + 1;
+      home.form.push("W");
+      away.form.push("L");
+    } else if (m.noShow === "both") {
+      // Ambos NO presentados: penalización de -3 pts a cada uno
+      home.lost++;
+      away.lost++;
+      home.points -= 3;
+      away.points -= 3;
+      home.penaltyPoints = (home.penaltyPoints || 0) + 3;
+      away.penaltyPoints = (away.penaltyPoints || 0) + 3;
+      home.noShowCount = (home.noShowCount || 0) + 1;
+      away.noShowCount = (away.noShowCount || 0) + 1;
+      home.form.push("L");
+      away.form.push("L");
     } else {
-      home.drawn++;
-      away.drawn++;
-      home.points++;
-      away.points++;
-      home.form.push("D");
-      away.form.push("D");
+      // Partido normal
+      if (hs > as) {
+        home.won++;
+        away.lost++;
+        home.points += 3;
+        home.form.push("W");
+        away.form.push("L");
+      } else if (hs < as) {
+        away.won++;
+        home.lost++;
+        away.points += 3;
+        home.form.push("L");
+        away.form.push("W");
+      } else {
+        home.drawn++;
+        away.drawn++;
+        home.points++;
+        away.points++;
+        home.form.push("D");
+        away.form.push("D");
+      }
     }
   }
 

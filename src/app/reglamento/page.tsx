@@ -39,7 +39,7 @@ const ARTICLES = [
   "Si un jugador recibe dos tarjetas amarillas en un mismo partido, será expulsado, pero podrá entrar otro jugador en su lugar inmediatamente. Si un jugador es expulsado con tarjeta roja (directa), el equipo se quedará con un jugador menos durante 3 minutos o hasta que el equipo contrario marque un gol (momento en el cual podrá entrar un sustituto).",
   "Se podrán cambiar jugadores de la plantilla solamente en las DOS PRIMERAS JORNADAS y en la PRIMERA de la Segunda Vuelta.",
   "Si un jugador sancionado juega un partido (alineación indebida), se le dará el partido por perdido (2 - 0), se comunicará al equipo contrario que ha ganado el encuentro y no se arbitrará el partido.",
-  "El equipo que no se presente a la hora señalada para jugar, se le dará el partido por perdido la 1ª vez (2 - 0). Si no se presentara por segunda vez en el mismo campeonato, automáticamente se le excluirá de la competición. El equipo que se retire o se le excluya del campeonato no podrá participar en la temporada siguiente.",
+  "El equipo que no se presente a la hora señalada para jugar, se le dará el partido por perdido la 1ª vez y se le descontarán 3 puntos en la clasificación. Si no se presentara por segunda vez en el mismo campeonato, automáticamente se le excluirá de la competición. El equipo que se retire o se le excluya del campeonato no podrá participar en la temporada siguiente.",
   "Los petos solamente se usarán cuando los dos equipos coincidan en el color de la camiseta, nunca para solucionar la falta de equipación de un jugador.",
   "Se sancionarán con falta las entradas a ras de suelo (segadas) para la disputa del balón.",
   "Se aplicará Ley de la Ventaja y se contará la falta acumulativa cuando un jugador tenga ocasión de gol o vaya en dirección a la meta contraria.",
@@ -201,7 +201,7 @@ export default async function ReglamentoPage() {
       {/* Artículos completos del Reglamento */}
       <section className="space-y-4">
         <h2 className="border-b border-slate-200 pb-2 text-xl font-bold text-slate-900">
-          Artículos del Reglamento Oficial (1 al 40)
+          Artículos del Reglamento Oficial
         </h2>
 
         <div className="space-y-3">

@@ -171,7 +171,11 @@ export function RoundPosterModal({ matches, teams }: Props) {
         ctx.fillStyle = "#38bdf8";
         ctx.font = "bold 20px system-ui, -apple-system, sans-serif";
         ctx.textAlign = "center";
-        const timeBadge = isPlayed ? "FINALIZADO" : m.time || "17:00 h";
+        const timeBadge = isPlayed
+          ? "FINALIZADO"
+          : m.status === "postponed"
+            ? "APLAZADO"
+            : m.time || "17:00 h";
         ctx.fillText(timeBadge, width / 2, y + 36);
 
         // Equipo Local
@@ -430,8 +434,14 @@ export function RoundPosterModal({ matches, teams }: Props) {
                               {m.homeScore} - {m.awayScore}
                             </span>
                           ) : (
-                            <span className="rounded bg-slate-900 px-2 py-0.5 font-mono text-[10px] font-bold text-sky-300">
-                              {m.time || "17:00"}
+                            <span
+                              className={`rounded px-2 py-0.5 font-mono text-[10px] font-bold ${
+                                m.status === "postponed"
+                                  ? "bg-amber-400 text-slate-950 font-black"
+                                  : "bg-slate-900 text-sky-300"
+                              }`}
+                            >
+                              {m.status === "postponed" ? "APLAZADO" : m.time || "17:00"}
                             </span>
                           )}
                         </div>

@@ -40,7 +40,7 @@ function done(path: string, message?: string): never {
 }
 
 const EVENT_TYPES: EventType[] = ["goal", "own_goal", "yellow", "red"];
-const STATUSES: MatchStatus[] = ["scheduled", "in_progress", "played", "postponed"];
+const STATUSES: MatchStatus[] = ["scheduled", "in_progress", "played", "postponed", "no_show"];
 
 // ---------- sesión ----------
 
@@ -266,14 +266,30 @@ export async function updateMatch(fd: FormData) {
   if (homeTeamId === awayTeamId) fail(back, "Elige dos equipos distintos.");
   const statusRaw = str(fd, "status") as MatchStatus;
   const status = STATUSES.includes(statusRaw) ? statusRaw : "scheduled";
+  const noShowRaw = str(fd, "noShow");
+  const noShow = (noShowRaw === "home" || noShowRaw === "away" || noShowRaw === "both") ? noShowRaw : undefined;
+
   let homeScore = intOrNull(fd, "homeScore");
   let awayScore = intOrNull(fd, "awayScore");
-  if (status === "in_progress" && (homeScore === null || awayScore === null)) {
+
+  if (status === "no_show" || noShow) {
+    if (noShow === "home") {
+      homeScore = homeScore ?? 0;
+      awayScore = awayScore ?? 3;
+    } else if (noShow === "away") {
+      homeScore = homeScore ?? 3;
+      awayScore = awayScore ?? 0;
+    } else if (noShow === "both") {
+      homeScore = homeScore ?? 0;
+      awayScore = awayScore ?? 0;
+    }
+  } else if (status === "in_progress" && (homeScore === null || awayScore === null)) {
     homeScore = homeScore ?? 0;
     awayScore = awayScore ?? 0;
-  }
-  if (status === "played" && (homeScore === null || awayScore === null)) {
+  } else if (status === "played" && (homeScore === null || awayScore === null)) {
     fail(back, "Para marcar el partido como finalizado, introduce el resultado.");
+  } else if (status === "postponed") {
+    // Si se aplaza, los goles pueden ser nulos
   }
   const comp = str(fd, "competition") as "liga" | "copa";
   const stage = str(fd, "stage");
@@ -288,9 +304,10 @@ export async function updateMatch(fd: FormData) {
     m.homeTeamId = homeTeamId;
     m.awayTeamId = awayTeamId;
     m.status = status;
-    m.homeScore = homeScore;
-    m.awayScore = awayScore;
-    if (status === "played" && !m.finishedAt) {
+    m.noShow = noShow;
+    m.homeScore = status === "postponed" && homeScore === null ? null : homeScore;
+    m.awayScore = status === "postponed" && awayScore === null ? null : awayScore;
+    if ((status === "played" || status === "no_show") && !m.finishedAt) {
       m.finishedAt = new Date().toISOString();
     }
     m.referee = str(fd, "referee", 120);
@@ -380,7 +397,29 @@ export async function quickLiveUpdate(fd: FormData) {
         if (newStatus === "in_progress") {
           if (m.homeScore === null) m.homeScore = 0;
           if (m.awayScore === null) m.awayScore = 0;
+        } else if (newStatus === "postponed") {
+          m.noShow = undefined;
         }
+      }
+    } else if (actionType === "set_postponed") {
+      m.status = "postponed";
+      m.noShow = undefined;
+    } else if (actionType === "set_no_show") {
+      const forfeitSide = (str(fd, "noShowSide") as "home" | "away" | "both") || "home";
+      m.status = "no_show";
+      m.noShow = forfeitSide;
+      if (forfeitSide === "home") {
+        m.homeScore = 0;
+        m.awayScore = 3;
+      } else if (forfeitSide === "away") {
+        m.homeScore = 3;
+        m.awayScore = 0;
+      } else {
+        m.homeScore = 0;
+        m.awayScore = 0;
+      }
+      if (!m.finishedAt) {
+        m.finishedAt = new Date().toISOString();
       }
     }
 
