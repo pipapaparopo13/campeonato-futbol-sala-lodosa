@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { getDB } from "@/lib/db";
 import { computePlayerStats, computeSanctions, computeStandings, sortMatches, teamMap } from "@/lib/stats";
 import { Card, CardIcon, Empty, MatchRow, TeamBadge } from "@/components/ui";
+import { TeamRosterPosterModal } from "@/components/team-roster-poster-modal";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -102,51 +103,83 @@ export default async function EquipoPage({ params }: Props) {
       )}
 
       <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr]">
-        <Card title="Plantilla">
+        <Card
+          title="Plantilla"
+          action={
+            roster.length > 0 ? (
+              <TeamRosterPosterModal
+                team={team}
+                players={roster.map((r) => r.player)}
+                variant="secondary"
+                buttonLabel="Exportar cartel"
+              />
+            ) : undefined
+          }
+        >
           {roster.length ? (
-            <div className="-mx-5 overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="text-xs text-slate-400 uppercase">
-                    <th className="w-12 py-2 pl-5 text-left">Dorsal</th>
-                    <th className="py-2 text-left">Jugador</th>
-                    <th className="py-2 text-center" title="Estado">Estado</th>
-                    <th className="py-2 text-center" title="Goles">⚽</th>
-                    <th className="py-2 text-center" title="Amarillas"><CardIcon type="yellow" /></th>
-                    <th className="py-2 pr-5 text-center" title="Rojas"><CardIcon type="red" /></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {roster.map((s) => {
-                    const isBanned = sanctions.has(s.player.id);
-                    return (
-                      <tr key={s.player.id} className="border-t border-slate-100">
-                        <td className="py-2 pl-5 font-mono font-bold text-slate-400">{s.player.number ?? "–"}</td>
-                        <td className="py-2">
-                          <Link href={`/jugadores/${s.player.id}`} className="font-medium hover:underline">
-                            {s.player.name}
-                          </Link>
-                        </td>
-                        <td className="py-2 text-center">
-                          {isBanned ? (
-                            <span
-                              className="rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-bold text-red-800"
-                              title={sanctions.get(s.player.id)?.reason}
-                            >
-                              ⛔ Sancionado
-                            </span>
-                          ) : (
-                            <span className="text-[11px] text-emerald-700 font-medium">Habilitado</span>
-                          )}
-                        </td>
-                        <td className="py-2 text-center font-semibold">{s.goals || ""}</td>
-                        <td className="py-2 text-center">{s.yellows || ""}</td>
-                        <td className="py-2 pr-5 text-center">{s.reds || ""}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+            <div>
+              <div className="-mx-5 overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="text-xs text-slate-400 uppercase">
+                      <th className="w-12 py-2 pl-5 text-left">Dorsal</th>
+                      <th className="py-2 text-left">Jugador</th>
+                      <th className="py-2 text-center" title="Estado">Estado</th>
+                      <th className="py-2 text-center" title="Goles">⚽</th>
+                      <th className="py-2 text-center" title="Amarillas"><CardIcon type="yellow" /></th>
+                      <th className="py-2 pr-5 text-center" title="Rojas"><CardIcon type="red" /></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {roster.map((s) => {
+                      const isBanned = sanctions.has(s.player.id);
+                      return (
+                        <tr key={s.player.id} className="border-t border-slate-100">
+                          <td className="py-2 pl-5 font-mono font-bold text-slate-400">{s.player.number ?? "–"}</td>
+                          <td className="py-2">
+                            <Link href={`/jugadores/${s.player.id}`} className="font-medium hover:underline">
+                              {s.player.name}
+                            </Link>
+                          </td>
+                          <td className="py-2 text-center">
+                            {isBanned ? (
+                              <span
+                                className="rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-bold text-red-800"
+                                title={sanctions.get(s.player.id)?.reason}
+                              >
+                                ⛔ Sancionado
+                              </span>
+                            ) : (
+                              <span className="text-[11px] text-emerald-700 font-medium">Habilitado</span>
+                            )}
+                          </td>
+                          <td className="py-2 text-center font-semibold">{s.goals || ""}</td>
+                          <td className="py-2 text-center">{s.yellows || ""}</td>
+                          <td className="py-2 pr-5 text-center">{s.reds || ""}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Botón y sección al pie de la lista de jugadores */}
+              <div className="mt-5 border-t border-slate-100 pt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-slate-50/70 -mx-5 -mb-5 p-4 rounded-b-2xl">
+                <div>
+                  <div className="text-xs font-bold text-slate-800">
+                    Cartel oficial de la plantilla
+                  </div>
+                  <div className="text-[11px] text-slate-500">
+                    Imagen con escudo, dorsales y nombres para WhatsApp o redes.
+                  </div>
+                </div>
+                <TeamRosterPosterModal
+                  team={team}
+                  players={roster.map((r) => r.player)}
+                  variant="primary"
+                  buttonLabel="📸 Exportar equipo"
+                />
+              </div>
             </div>
           ) : (
             <Empty>Plantilla todavía no publicada.</Empty>
