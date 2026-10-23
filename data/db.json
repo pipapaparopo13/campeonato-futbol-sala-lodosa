@@ -688,13 +688,6 @@
       "position": ""
     },
     {
-      "id": "11179d654a9b",
-      "teamId": "6f5041b7a8a3",
-      "name": "Jamal Boukal",
-      "number": 13,
-      "position": ""
-    },
-    {
       "id": "dd3bd87c54ec",
       "teamId": "434fab26dacd",
       "name": "Diego Velasquez Vogel",
@@ -941,9 +934,9 @@
     },
     {
       "id": "4def605d60cf",
-      "teamId": "4e58cd19c12f",
-      "name": "Steven Ibarbo Diaz",
-      "number": 9,
+      "teamId": "434fab26dacd",
+      "name": "Steven Ibarbo Díaz",
+      "number": 14,
       "position": ""
     },
     {
@@ -969,10 +962,11 @@
     },
     {
       "id": "1d89a7ddbba1",
-      "teamId": "4e58cd19c12f",
-      "name": "Jose Zambrano",
+      "teamId": "434fab26dacd",
+      "name": "José Zambrano",
       "number": 13,
-      "position": ""
+      "position": "",
+      "dni": "16650987E"
     },
     {
       "id": "3690451e22eb",
@@ -1077,6 +1071,36 @@
       "teamId": "b402d223a79c",
       "name": "Jorge Subero Martínez",
       "number": 15,
+      "position": ""
+    },
+    {
+      "id": "1a98ee89959c",
+      "teamId": "6f5041b7a8a3",
+      "name": "Gonzalo Pérez Siles",
+      "number": 13,
+      "dni": "47023085E",
+      "position": ""
+    },
+    {
+      "id": "a80009706a23",
+      "teamId": "6f5041b7a8a3",
+      "name": "Hamza Hachimi",
+      "number": 14,
+      "dni": "60312247Z",
+      "position": ""
+    },
+    {
+      "id": "4c6290e85e70",
+      "teamId": "4e58cd19c12f",
+      "name": "Julen Basterra Gámez",
+      "number": 9,
+      "position": ""
+    },
+    {
+      "id": "4beb30db31f7",
+      "teamId": "4e58cd19c12f",
+      "name": "Abdelhaq Bentabete Tabi",
+      "number": 13,
       "position": ""
     }
   ],

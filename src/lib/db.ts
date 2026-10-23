@@ -154,30 +154,63 @@ async function readRaw(): Promise<DB> {
           needsSync = true;
         }
 
-        // Sincronizar altas y bajas oficiales de jugadores en KV si difieren
-        // 1. Eliminar Hachimi si todavía está en KV (salvo que tenga eventos)
-        const hasHachimi = remote.players?.some((p) => p.name.toLowerCase().includes("hachimi"));
-        if (hasHachimi) {
-          const playedPlayerIds = new Set(
-            (remote.matches || []).flatMap((m) => m.events || []).map((e) => e.playerId)
-          );
-          remote.players = (remote.players || []).filter(
-            (p) => !p.name.toLowerCase().includes("hachimi") || playedPlayerIds.has(p.id)
-          );
+        // Sincronizar altas, bajas y traspasos oficiales de jugadores en KV si difieren
+        const playedPlayerIds = new Set(
+          (remote.matches || []).flatMap((m) => m.events || []).map((e) => e.playerId)
+        );
+
+        // 1. Eliminar jugadores dados de baja oficial si no tienen eventos en partidos jugados
+        const officialPlayerIds = new Set(official.players.map((p) => p.id));
+        const officialPlayerNames = new Set(
+          official.players.map((p) => p.name.trim().toLowerCase())
+        );
+
+        const initialRemoteCount = remote.players?.length || 0;
+        remote.players = (remote.players || []).filter((p) => {
+          // Si está en la lista oficial, conservarlo
+          if (
+            officialPlayerIds.has(p.id) ||
+            officialPlayerNames.has(p.name.trim().toLowerCase())
+          ) {
+            return true;
+          }
+          // Si fue dado de baja pero tiene eventos registrados en partidos, conservarlo para no romper historiales
+          return playedPlayerIds.has(p.id);
+        });
+
+        if (remote.players.length !== initialRemoteCount) {
           needsSync = true;
         }
 
-        // 2. Incorporar nuevos jugadores oficiales si no existen aún en KV
+        // 2. Incorporar nuevos jugadores oficiales y actualizar traspasos (cambio de equipo o dorsal)
         for (const officialPlayer of official.players) {
-          const exists = remote.players?.some(
+          const remotePlayer = remote.players.find(
             (p) =>
               p.id === officialPlayer.id ||
-              (p.name.toLowerCase() === officialPlayer.name.toLowerCase() && p.teamId === officialPlayer.teamId)
+              p.name.trim().toLowerCase() === officialPlayer.name.trim().toLowerCase()
           );
-          if (!exists) {
-            if (!remote.players) remote.players = [];
+
+          if (!remotePlayer) {
             remote.players.push(officialPlayer);
             needsSync = true;
+          } else {
+            // Actualizar si cambió de equipo (traspaso), número, dni o nombre oficial
+            if (remotePlayer.teamId !== officialPlayer.teamId) {
+              remotePlayer.teamId = officialPlayer.teamId;
+              needsSync = true;
+            }
+            if (remotePlayer.number !== officialPlayer.number) {
+              remotePlayer.number = officialPlayer.number;
+              needsSync = true;
+            }
+            if (officialPlayer.dni && remotePlayer.dni !== officialPlayer.dni) {
+              remotePlayer.dni = officialPlayer.dni;
+              needsSync = true;
+            }
+            if (remotePlayer.name !== officialPlayer.name) {
+              remotePlayer.name = officialPlayer.name;
+              needsSync = true;
+            }
           }
         }
 
