@@ -150,10 +150,12 @@ export async function addPlayer(fd: FormData) {
   const back = `/admin/equipos/${teamId}`;
   const name = str(fd, "name", 80);
   if (!name) fail(back, "El nombre del jugador es obligatorio.");
-  await mutate((db) => {
-    if (!db.teams.some((t) => t.id === teamId)) return;
+  const err = await mutate((db) => {
+    if (!db.teams.some((t) => t.id === teamId)) return "Equipo no encontrado.";
     db.players.push({ id: newId(), teamId, name, number: intOrNull(fd, "number") });
+    return null;
   });
+  if (err) fail(back, err);
   done(back, "Jugador añadido.");
 }
 
@@ -164,12 +166,14 @@ export async function updatePlayer(fd: FormData) {
   const back = `/admin/equipos/${teamId}`;
   const name = str(fd, "name", 80);
   if (!name) fail(back, "El nombre del jugador es obligatorio.");
-  await mutate((db) => {
+  const err = await mutate((db) => {
     const p = db.players.find((x) => x.id === id);
-    if (!p) return;
+    if (!p) return "Jugador no encontrado en la plantilla.";
     p.name = name;
     p.number = intOrNull(fd, "number");
+    return null;
   });
+  if (err) fail(back, err);
   done(back, "Jugador actualizado.");
 }
 

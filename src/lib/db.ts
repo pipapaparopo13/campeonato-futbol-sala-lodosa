@@ -121,7 +121,6 @@ async function writeRaw(db: DB) {
   const kv = getKvConfig();
   if (kv) {
     await writeKv(kv.url, kv.token, db);
-    return;
   }
   await writeLocalFile(db);
 }
@@ -147,71 +146,17 @@ async function readRaw(): Promise<DB> {
               remote.teams[i].color = official.teams[i].color;
             }
           }
-          // Si no tenía jugadores, cargar los 140 jugadores oficiales vinculándolos a los ids de equipos
+          // Si no tenía jugadores, cargar los jugadores oficiales vinculándolos a los ids de equipos
           if (!remote.players || remote.players.length === 0) {
             remote.players = official.players;
           }
           needsSync = true;
         }
 
-        // Sincronizar altas, bajas y traspasos oficiales de jugadores en KV si difieren
-        const playedPlayerIds = new Set(
-          (remote.matches || []).flatMap((m) => m.events || []).map((e) => e.playerId)
-        );
-
-        // 1. Eliminar jugadores dados de baja oficial si no tienen eventos en partidos jugados
-        const officialPlayerIds = new Set(official.players.map((p) => p.id));
-        const officialPlayerNames = new Set(
-          official.players.map((p) => p.name.trim().toLowerCase())
-        );
-
-        const initialRemoteCount = remote.players?.length || 0;
-        remote.players = (remote.players || []).filter((p) => {
-          // Si está en la lista oficial, conservarlo
-          if (
-            officialPlayerIds.has(p.id) ||
-            officialPlayerNames.has(p.name.trim().toLowerCase())
-          ) {
-            return true;
-          }
-          // Si fue dado de baja pero tiene eventos registrados en partidos, conservarlo para no romper historiales
-          return playedPlayerIds.has(p.id);
-        });
-
-        if (remote.players.length !== initialRemoteCount) {
+        // Si la lista de jugadores no existiese en KV por algún motivo, cargarla inicialmente
+        if (!remote.players || remote.players.length === 0) {
+          remote.players = official.players;
           needsSync = true;
-        }
-
-        // 2. Incorporar nuevos jugadores oficiales y actualizar traspasos (cambio de equipo o dorsal)
-        for (const officialPlayer of official.players) {
-          const remotePlayer = remote.players.find(
-            (p) =>
-              p.id === officialPlayer.id ||
-              p.name.trim().toLowerCase() === officialPlayer.name.trim().toLowerCase()
-          );
-
-          if (!remotePlayer) {
-            remote.players.push(officialPlayer);
-            needsSync = true;
-          } else {
-            // Actualizar si cambió de equipo (traspaso), número, dni o nombre oficial
-            if (remotePlayer.teamId !== officialPlayer.teamId) {
-              remotePlayer.teamId = officialPlayer.teamId;
-              needsSync = true;
-            }
-            if (remotePlayer.number !== officialPlayer.number) {
-              remotePlayer.number = officialPlayer.number;
-              needsSync = true;
-            }
-            if (officialPlayer.dni && remotePlayer.dni !== officialPlayer.dni) {
-              remotePlayer.dni = officialPlayer.dni;
-              needsSync = true;
-            }
-            if (remotePlayer.name !== officialPlayer.name) {
-              remotePlayer.name = officialPlayer.name;
-              needsSync = true;
-            }
-          }
         }
 
         if (needsSync) {
