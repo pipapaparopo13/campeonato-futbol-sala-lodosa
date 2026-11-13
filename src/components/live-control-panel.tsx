@@ -10,10 +10,11 @@ interface Props {
   home: Team | undefined;
   away: Team | undefined;
   players: Player[];
+  sanctionedPlayerIds?: string[];
   redirectTo?: string;
 }
 
-export function LiveControlPanel({ match, home, away, players, redirectTo }: Props) {
+export function LiveControlPanel({ match, home, away, players, sanctionedPlayerIds, redirectTo }: Props) {
   const [isPending, startTransition] = useTransition();
 
   // Modal / selector rápido para añadir eventos (gol, tarjeta)
@@ -443,12 +444,16 @@ export function LiveControlPanel({ match, home, away, players, redirectTo }: Pro
                   {activeTeamPlayers.length === 0 ? (
                     <option value="">Sin jugadores registrados en este equipo</option>
                   ) : (
-                    activeTeamPlayers.map((p) => (
-                      <option key={p.id} value={p.id}>
-                        {p.number != null ? `#${p.number} ` : ""}
-                        {p.name}
-                      </option>
-                    ))
+                    activeTeamPlayers.map((p) => {
+                      const isSanctioned = sanctionedPlayerIds?.includes(p.id);
+                      return (
+                        <option key={p.id} value={p.id}>
+                          {p.number != null ? `#${p.number} ` : ""}
+                          {p.name}
+                          {isSanctioned ? " ⛔ (SANCIONADO)" : ""}
+                        </option>
+                      );
+                    })
                   )}
                 </select>
               </div>

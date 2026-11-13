@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { getDB } from "@/lib/db";
 import { getSession } from "@/lib/auth";
-import { isPlayed, sortMatches, teamMap } from "@/lib/stats";
+import { computeSanctions, isPlayed, sortMatches, teamMap } from "@/lib/stats";
 import { Card, Empty, Flash, MatchRow, PageTitle } from "@/components/ui";
 import { MesaScanner } from "@/components/mesa-scanner";
 
@@ -26,6 +26,7 @@ export default async function AdminHome({
           matches={db.matches}
           teams={Object.fromEntries(teams)}
           players={db.players}
+          sanctionedPlayerIds={Array.from(computeSanctions(db).keys())}
         />
       </div>
     );

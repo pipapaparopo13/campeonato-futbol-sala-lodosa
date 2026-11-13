@@ -133,7 +133,11 @@ export default async function EstadisticasPage() {
                         </Link>
                       </td>
                       <td className="py-2 text-center text-xs text-slate-500">
-                        {s.yellows >= 3 ? (
+                        {sanctions.has(s.player.id) ? (
+                          <span className="font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded text-[11px] inline-block">
+                            ⛔ Sancionado
+                          </span>
+                        ) : s.yellows >= 3 ? (
                           <span className="font-bold text-red-700">Ciclo cumplido</span>
                         ) : (
                           <span>A {yellowToNextBan} de sanción</span>

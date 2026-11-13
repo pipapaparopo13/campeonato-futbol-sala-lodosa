@@ -21,9 +21,9 @@ export function isPlayed(m: Match) {
 export function sortMatches(matches: Match[]) {
   return [...matches].sort(
     (a, b) =>
-      a.round - b.round ||
       (a.date || "9999").localeCompare(b.date || "9999") ||
-      (a.time || "99").localeCompare(b.time || "99"),
+      (a.time || "99").localeCompare(b.time || "99") ||
+      a.round - b.round,
   );
 }
 
@@ -295,11 +295,13 @@ export interface PlayerSanction {
 /** Calcula qué jugadores tienen sanción activa para el próximo partido. */
 export function computeSanctions(db: DB): Map<string, PlayerSanction> {
   const teams = teamMap(db);
-  const playedMatches = sortMatches(db.matches).filter(isPlayed);
+  const playedMatches = sortMatches(db.matches).filter(
+    (m) => isPlayed(m) || m.status === "played",
+  );
   const sanctions = new Map<string, PlayerSanction>();
 
   for (const player of db.players) {
-    // Partidos jugados por el equipo del jugador en orden cronológico
+    // Partidos disputados por el equipo del jugador en estricto orden cronológico
     const teamPlayedMatches = playedMatches.filter(
       (m) => m.homeTeamId === player.teamId || m.awayTeamId === player.teamId,
     );
@@ -311,7 +313,7 @@ export function computeSanctions(db: DB): Map<string, PlayerSanction> {
     for (let i = 0; i < teamPlayedMatches.length; i++) {
       const match = teamPlayedMatches[i];
 
-      // Cumplimiento de sanción pendiente
+      // Cumplimiento de sanción pendiente: cada partido disputado posterior descuenta 1 partido
       if (pendingBan > 0) {
         pendingBan--;
         if (pendingBan === 0) {
@@ -323,22 +325,31 @@ export function computeSanctions(db: DB): Map<string, PlayerSanction> {
       const yellowsInMatch = eventsInMatch.filter((e) => e.type === "yellow").length;
       const redsInMatch = eventsInMatch.filter((e) => e.type === "red").length;
 
-      // Tarjeta roja o doble amarilla
-      if (redsInMatch > 0) {
+      const compLabel =
+        match.competition === "copa"
+          ? `Copa · ${match.stage || `Jornada ${match.round}`}`
+          : `Jornada ${match.round}`;
+
+      // Doble amarilla o tarjeta roja directa
+      // Si tuvo 2 amarillas en el mismo partido (o 2 amarillas + 1 roja por la expulsión), es doble amarilla
+      if (yellowsInMatch >= 2) {
         pendingBan = 1;
-        lastReason = `Tarjeta roja en Jornada ${match.round}`;
-      } else if (yellowsInMatch >= 2) {
+        lastReason = `Doble amarilla en ${compLabel}`;
+      } else if (redsInMatch > 0) {
         pendingBan = 1;
-        lastReason = `Doble amarilla en Jornada ${match.round}`;
+        lastReason = `Tarjeta roja en ${compLabel}`;
       }
 
       // Ciclo de tarjetas amarillas (3, 6, 9...)
-      yellowAccum += yellowsInMatch;
-      if (yellowAccum > 0 && yellowAccum % 3 === 0 && yellowsInMatch > 0) {
-        const cycle = Math.floor(yellowAccum / 3);
-        const banGames = cycle === 1 ? 1 : cycle === 2 ? 2 : 3;
-        pendingBan = Math.max(pendingBan, banGames);
-        lastReason = `Ciclo de ${yellowAccum} amarillas (${cycle}º ciclo)`;
+      // Solo acumulan para ciclo las amarillas de partidos donde no hubo expulsión por doble amarilla
+      if (yellowsInMatch === 1) {
+        yellowAccum += 1;
+        if (yellowAccum % 3 === 0) {
+          const cycle = Math.floor(yellowAccum / 3);
+          const banGames = cycle === 1 ? 1 : cycle === 2 ? 2 : 3;
+          pendingBan = Math.max(pendingBan, banGames);
+          lastReason = `Ciclo de ${yellowAccum} amarillas (${cycle}º ciclo)`;
+        }
       }
     }
 

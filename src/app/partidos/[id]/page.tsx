@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getDB } from "@/lib/db";
 import { isAdmin } from "@/lib/auth";
-import { eventSide, formatDate, playerMap, sortEvents, teamMap } from "@/lib/stats";
+import { computeSanctions, eventSide, formatDate, playerMap, sortEvents, teamMap } from "@/lib/stats";
 import { EVENT_LABELS, STATUS_LABELS } from "@/lib/types";
 import { Card, Empty, EventIcon, TeamBadge, TeamName } from "@/components/ui";
 import { ShareMatchButtons } from "@/components/share-buttons";
@@ -45,6 +45,16 @@ export default async function ActaPage({ params }: Props) {
 
   const homePlayers = db.players.filter((p) => p.teamId === match.homeTeamId);
   const awayPlayers = db.players.filter((p) => p.teamId === match.awayTeamId);
+
+  const sanctions = computeSanctions(db);
+  const matchBannedPlayers = [
+    ...homePlayers
+      .filter((p) => sanctions.has(p.id))
+      .map((p) => ({ player: p, team: home, sanction: sanctions.get(p.id)! })),
+    ...awayPlayers
+      .filter((p) => sanctions.has(p.id))
+      .map((p) => ({ player: p, team: away, sanction: sanctions.get(p.id)! })),
+  ];
 
   return (
     <div className="space-y-6">
@@ -132,6 +142,34 @@ export default async function ActaPage({ params }: Props) {
           ))}
         </dl>
       </section>
+
+      {!played && matchBannedPlayers.length > 0 && (
+        <div className="rounded-2xl border border-rose-300 bg-rose-50/90 p-4 shadow-xs">
+          <div className="flex items-center gap-2 text-rose-900 font-bold text-sm">
+            <span>⛔</span>
+            <span>Jugadores sancionados para este partido (no pueden disputar el encuentro):</span>
+          </div>
+          <div className="mt-2.5 grid gap-2 sm:grid-cols-2">
+            {matchBannedPlayers.map(({ player, team, sanction }) => (
+              <div
+                key={player.id}
+                className="flex items-center justify-between rounded-xl bg-white p-2.5 text-xs shadow-xs border border-rose-200"
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  <TeamBadge team={team} size="sm" />
+                  <span className="font-bold text-slate-800 truncate">
+                    {player.number != null ? `${player.number}. ` : ""}
+                    {player.name}
+                  </span>
+                </div>
+                <span className="ml-2 shrink-0 rounded bg-rose-100 px-2 py-0.5 text-[10px] font-bold text-rose-800">
+                  {sanction.reason}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {match.noShow && (
         <div className="rounded-2xl border border-rose-300 bg-rose-50 p-4 text-xs font-semibold text-rose-900 shadow-xs flex items-center gap-2.5">

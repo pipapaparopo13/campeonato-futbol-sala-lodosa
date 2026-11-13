@@ -68,6 +68,7 @@ export default async function AdminPartido({
           home={home}
           away={away}
           players={db.players}
+          sanctionedPlayerIds={Array.from(sanctions.keys())}
           redirectTo={`/admin/partidos/${match.id}`}
         />
         <AiActaScanner matchId={match.id} />

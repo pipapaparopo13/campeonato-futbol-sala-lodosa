@@ -12,6 +12,7 @@ interface Props {
   matches: Match[];
   teams: Record<string, Team>;
   players: Player[];
+  sanctionedPlayerIds?: string[];
 }
 
 interface EditableEvent {
@@ -22,7 +23,7 @@ interface EditableEvent {
   minute: number | null;
 }
 
-export function MesaScanner({ matches, teams, players }: Props) {
+export function MesaScanner({ matches, teams, players, sanctionedPlayerIds }: Props) {
   // 1. Agrupar jornadas disponibles
   const rounds = useMemo(() => {
     const list: { key: string; label: string; competition: string; round: number }[] = [];
@@ -373,6 +374,7 @@ export function MesaScanner({ matches, teams, players }: Props) {
           home={homeTeam || undefined}
           away={awayTeam || undefined}
           players={players}
+          sanctionedPlayerIds={sanctionedPlayerIds}
           redirectTo="/admin"
         />
       )}
